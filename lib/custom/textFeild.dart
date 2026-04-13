@@ -17,8 +17,8 @@ class AppFormField extends StatefulWidget {
     this.controller,
     this.validator,
 
-    this.readOnly = false,   // ← جديد
-    this.initialValue,       //
+    this.readOnly = false,
+    this.initialValue,
     super.key,
 
   });
@@ -32,7 +32,7 @@ class AppFormField extends StatefulWidget {
   final TextEditingController? controller;
   final validator;
 
-  final bool readOnly;        // ← جديد
+  final bool readOnly;
   final String? initialValue;
 
   @override

@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:new_project/core/di/di.dart';
-import 'package:new_project/custom/scaffold.dart';
 import 'package:new_project/design/AppColor.dart';
-import 'package:new_project/design/AppImage.dart';
 import 'package:new_project/l10n/app_localizations.dart';
 import 'package:new_project/parking%20report/ParkingCubit.dart';
 import 'package:new_project/parking%20report/ParkingState.dart';
 import 'package:new_project/providers/ThemeProvider.dart';
 import 'package:provider/provider.dart';
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
 
 bool _isPresent(String raw) {
   final s = raw.toLowerCase().trim();
@@ -39,25 +35,82 @@ String _fmtTime(String raw) {
   return raw;
 }
 
-// ── Screen ────────────────────────────────────────────────────────────────────
-
-class ParkingScreen extends StatelessWidget {
+class ParkingScreen extends StatefulWidget {
   const ParkingScreen({super.key});
 
   @override
+  State<ParkingScreen> createState() => _ParkingScreenState();
+}
+
+class _ParkingScreenState extends State<ParkingScreen> {
+
+  int? selectedYear;
+  int? selectedMonth;
+
+
+  void _shiftMonth(int delta) {
+    setState(() {
+      final now = DateTime.now();
+      int m = (selectedMonth ?? now.month) + delta;
+      int y = selectedYear ?? now.year;
+      if (m > 12) {
+        m = 1;
+        y++;
+      } else if (m < 1) {
+        m = 12;
+        y--;
+      }
+      selectedMonth = m;
+      selectedYear = y;
+    });
+  }
+
+  List<MapEntry<String, dynamic>> _filterDetails(Map<String, dynamic> data) {
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    return data.entries.where((entry) {
+      final date = DateTime.tryParse(entry.key);
+      if (date == null) return false;
+      final dateOnly = DateTime(date.year, date.month, date.day);
+      if (dateOnly.isAfter(todayOnly)) return false;
+      final matchYear  = selectedYear  == null || date.year  == selectedYear;
+      final matchMonth = selectedMonth == null || date.month == selectedMonth;
+      return matchYear && matchMonth;
+    }).toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+  }
+  List<String> _monthNames(BuildContext context) => [
+    AppLocalizations.of(context)!.jan,
+    AppLocalizations.of(context)!.feb,
+    AppLocalizations.of(context)!.mar,
+    AppLocalizations.of(context)!.apr,
+    AppLocalizations.of(context)!.may,
+    AppLocalizations.of(context)!.jun,
+    AppLocalizations.of(context)!.jul,
+    AppLocalizations.of(context)!.aug,
+    AppLocalizations.of(context)!.sep,
+    AppLocalizations.of(context)!.oct,
+    AppLocalizations.of(context)!.nov,
+    AppLocalizations.of(context)!.dec,
+  ];
+
+  String _monthYearLabel(BuildContext context) {
+    final now = DateTime.now();
+    final m = selectedMonth ?? now.month;
+    final y = selectedYear ?? now.year;
+    return '${_monthNames(context)[m - 1]} $y';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final dark = Provider.of<ThemeProvider>(context).isDarkMode;
+
     return BlocProvider(
       create: (context) => getIt<ParkingCubit>()..getParkingReport(),
       child: Builder(
         builder: (context) {
-          return CustomScaffold(
-            image: AppImage.Logo,
-            icons: const Icon(
-              Icons.arrow_forward_ios,
-              color: AppColor.royalBlue,
-              size: 30,
-            ),
-            onIconPressed: () => Navigator.pop(context),
+          return Scaffold(
+            backgroundColor: dark ? AppColor.darkBackground : AppColor.primary,
             body: BlocBuilder<ParkingCubit, ParkingState>(
               builder: (context, state) {
                 if (state is ParkingLoadingState) {
@@ -99,12 +152,10 @@ class ParkingScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 20),
                           TextButton.icon(
-                            onPressed: () => context
-                                .read<ParkingCubit>()
-                                .getParkingReport(),
+                            onPressed: () =>
+                                context.read<ParkingCubit>().getParkingReport(),
                             icon: const Icon(Icons.refresh_rounded, size: 18),
-                            label: Text(
-                                AppLocalizations.of(context)!.try_again),
+                            label: Text(AppLocalizations.of(context)!.try_again),
                             style: TextButton.styleFrom(
                               foregroundColor: AppColor.royalBlue,
                               backgroundColor:
@@ -123,60 +174,66 @@ class ParkingScreen extends StatelessWidget {
                 }
 
                 if (state is ParkingSuccessState) {
-                  final details = state.model.details;
+                  final rawDetails = state.model.details;
+                  final filteredEntries = _filterDetails(
+                    rawDetails.map((k, v) => MapEntry(k, v)),
+                  );
 
-                  if (details.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.local_parking_rounded,
-                              size: 48,
-                              color: AppColor.gray.withValues(alpha: 0.4),
+                  return Column(
+                    children: [
+                      _buildHeader(context),
+                      Expanded(
+                        child: filteredEntries.isEmpty
+                            ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.local_parking_rounded,
+                                  size: 48,
+                                  color: AppColor.gray.withValues(alpha: 0.4),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  AppLocalizations.of(context)!.no_data,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: dark
+                                        ? AppColor.softGray
+                                        : AppColor.gray,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              AppLocalizations.of(context)!.no_data,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Provider.of<ThemeProvider>(context)
-                                    .isDarkMode
-                                    ? AppColor.softGray
-                                    : AppColor.gray,
-                              ),
-                            ),
-                          ],
+                          ),
+                        )
+                            : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                          itemCount: filteredEntries.length,
+                          itemBuilder: (context, index) {
+                            final entry = filteredEntries[index];
+                            final value =
+                            Map<String, dynamic>.from(entry.value);
+                            final rawIn =
+                                (value['check_in'] ?? value['checkIn'])
+                                    ?.toString() ??
+                                    '';
+                            final rawOut =
+                                (value['check_out'] ?? value['checkOut'])
+                                    ?.toString() ??
+                                    '';
+                            return _ParkingCard(
+                              date: entry.key,
+                              checkIn: _fmtTime(rawIn),
+                              checkOut: _fmtTime(rawOut),
+                              status: value['status']?.toString() ?? '--',
+                            );
+                          },
                         ),
                       ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                    itemCount: details.keys.length,
-                    itemBuilder: (context, index) {
-                      final key = details.keys.elementAt(index);
-                      final value = details[key];
-
-                      // ✅ بنجرب check_in و checkIn عشان نضمن الاتنين
-                      final rawIn =
-                          (value['check_in'] ?? value['checkIn'])?.toString() ??
-                              '';
-                      final rawOut =
-                          (value['check_out'] ?? value['checkOut'])
-                              ?.toString() ??
-                              '';
-
-                      return _ParkingCard(
-                        date: key,
-                        checkIn: _fmtTime(rawIn),
-                        checkOut: _fmtTime(rawOut),
-                        status: value['status']?.toString() ?? '--',
-                      );
-                    },
+                    ],
                   );
                 }
 
@@ -188,9 +245,151 @@ class ParkingScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF1444C0), Color(0xFF4894FE)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+              child: Row(
+                children: [
+                  _NavBtn(icon: Icons.chevron_left, onTap: () => _shiftMonth(-1)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.calendar_month_rounded,
+                            color: Colors.white, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          _monthYearLabel(context),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  _NavBtn(icon: Icons.chevron_right, onTap: () => _shiftMonth(1)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            Container(height: 1, color: Colors.white.withValues(alpha: 0.15)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+              child: Row(
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: const Icon(Icons.local_parking_rounded,
+                        color: Colors.white, size: 26),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.monthly,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          _monthYearLabel(context),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.65),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.35)),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.report,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-// ── Card ──────────────────────────────────────────────────────────────────────
+class _NavBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _NavBtn({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Icon(icon, color: Colors.white, size: 20),
+      ),
+    );
+  }
+}
+
 
 class _ParkingCard extends StatelessWidget {
   final String date;
@@ -205,7 +404,6 @@ class _ParkingCard extends StatelessWidget {
     required this.status,
   });
 
-  // ✅ مقارنة آمنة بعيدة عن اللغة
   Color _statusColor() {
     if (_isPresent(status)) return AppColor.green;
     if (_isLate(status)) return Colors.orange;
@@ -246,7 +444,7 @@ class _ParkingCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header
+
           Padding(
             padding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -275,7 +473,7 @@ class _ParkingCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Status badge
+
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 5),
@@ -315,7 +513,6 @@ class _ParkingCard extends StatelessWidget {
                 : AppColor.softBlue.withValues(alpha: 0.5),
           ),
 
-          // Time row
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -347,9 +544,6 @@ class _ParkingCard extends StatelessWidget {
     );
   }
 }
-
-// ── TimeBox ───────────────────────────────────────────────────────────────────
-
 class _TimeBox extends StatelessWidget {
   final String label;
   final String time;

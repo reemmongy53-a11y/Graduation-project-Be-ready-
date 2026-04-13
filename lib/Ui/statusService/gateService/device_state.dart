@@ -1,31 +1,41 @@
+import 'package:equatable/equatable.dart';
 import 'package:new_project/Ui/statusService/gateService/device_command.dart';
-
-abstract class DeviceState {}
+abstract class DeviceState extends Equatable {
+  const DeviceState();
+  @override
+  List<Object?> get props => [];
+}
 
 class DeviceInitial extends DeviceState {}
 
-// ✅ States منفصلة للـ Gate
 class DeviceGateLoading extends DeviceState {}
 class DeviceGateCommandSent extends DeviceState {
   final DeviceCommand command;
-  DeviceGateCommandSent(this.command);
+  const DeviceGateCommandSent(this.command);
+  @override
+  List<Object?> get props => [command];
 }
 
-// ✅ States منفصلة للـ Camera
 class DeviceCameraLoading extends DeviceState {}
 class DeviceCameraCommandSent extends DeviceState {
   final DeviceCommand command;
-  DeviceCameraCommandSent(this.command);
+  const DeviceCameraCommandSent(this.command);
+  @override
+  List<Object?> get props => [command];
 }
 
-// ✅ Shared states
 class DeviceCommandDone extends DeviceState {
-  final String type; // 'gate' أو 'camera'
-  DeviceCommandDone({required this.type});
+  final String type;
+  final bool isOn; // ✅ ضيفنا الحقل ده
+  const DeviceCommandDone({required this.type, required this.isOn});
+  @override
+  List<Object?> get props => [type, isOn];
 }
 
 class DeviceError extends DeviceState {
   final String message;
   final String type;
-  DeviceError(this.message, {this.type = 'gate'});
+  const DeviceError(this.message, {required this.type});
+  @override
+  List<Object?> get props => [message, type];
 }

@@ -25,8 +25,6 @@ class EmployeeScreen extends StatefulWidget {
 }
 
 class _EmployeeScreenState extends State<EmployeeScreen> {
-
-  // ── Helpers ──
   String _formatDate(String raw) {
     try {
       final parsed = DateTime.parse(raw);
@@ -51,7 +49,9 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   Widget build(BuildContext context) {
     final dark = Provider.of<ThemeProvider>(context).isDarkMode;
     final name = UserSession.name.isNotEmpty ? UserSession.name : "User";
-    final email = UserSession.email.isNotEmpty ? UserSession.email : "name@gmail.com";
+    final email = UserSession.email.isNotEmpty
+        ? UserSession.email
+        : "name@gmail.com";
 
     return BlocProvider(
       create: (_) => getIt<AttendanceCubit>()..getReport(),
@@ -124,7 +124,9 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                       children: [
                         Item(
                           image: AppImage.Attendance,
-                          title: AppLocalizations.of(context)!.attendance_report,
+                          title: AppLocalizations.of(
+                            context,
+                          )!.attendance_report,
                           routeName: AppRoutes.AttReport.name,
                         ),
                         Item(
@@ -155,17 +157,17 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // ── Header ──────────────────────────────────────────────────
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             AppLocalizations.of(context)!.activity,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: dark ? AppColor.white : AppColor.black,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: dark ? AppColor.white : AppColor.black,
+                                ),
                           ),
                           GestureDetector(
                             onTap: () => Navigator.pushNamed(
@@ -174,18 +176,21 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                             ),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 5),
+                                horizontal: 14,
+                                vertical: 5,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColor.blue.withValues(alpha: 0.10),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
                                 AppLocalizations.of(context)!.view_all,
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColor.blue,
-                                ),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColor.blue,
+                                    ),
                               ),
                             ),
                           ),
@@ -201,15 +206,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                         height: 1,
                       ),
                       const SizedBox(height: 4),
-
-                      // ── BlocBuilder ──────────────────────────────────────────────
                       BlocBuilder<AttendanceCubit, AttendanceState>(
                         builder: (context, state) {
                           if (state is AttendanceLoadingState) {
                             return const Padding(
                               padding: EdgeInsets.symmetric(vertical: 24),
                               child: Center(
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                             );
                           }
@@ -235,42 +240,57 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
 
                             if (details.isEmpty) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 24),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 24,
+                                ),
                                 child: Center(
                                   child: Text(
                                     AppLocalizations.of(context)!.no_activity,
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: dark ? AppColor.softGray : AppColor.gray,
+                                      color: dark
+                                          ? AppColor.softGray
+                                          : AppColor.gray,
                                     ),
                                   ),
                                 ),
                               );
                             }
 
-                            final recentEntries = details.entries.take(3).toList();
+                            final recentEntries = details.entries
+                                .take(3)
+                                .toList();
 
                             return Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: List.generate(recentEntries.length, (i) {
+                              children: List.generate(recentEntries.length, (
+                                i,
+                              ) {
                                 final entry = recentEntries[i];
                                 final date = _formatDate(entry.key);
-                                final value = entry.value as Map<String, dynamic>;
+                                final value =
+                                    entry.value as Map<String, dynamic>;
                                 final status = value['status'] ?? '--';
-                                final timeIn = _formatTime(value['checkIn'] ?? '--');
-                                final timeOut = _formatTime(value['checkOut'] ?? '--');
+                                final timeIn = _formatTime(
+                                  value['checkIn'] ?? '--',
+                                );
+                                final timeOut = _formatTime(
+                                  value['checkOut'] ?? '--',
+                                );
                                 final isAbsent =
-                                    status == AppLocalizations.of(context)!.absence;
+                                    status ==
+                                    AppLocalizations.of(context)!.absence;
                                 final isLast = i == recentEntries.length - 1;
 
                                 return Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 10),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 10,
+                                      ),
                                       child: Row(
                                         children: [
-                                          // Status dot
                                           Container(
                                             width: 10,
                                             height: 10,
@@ -283,7 +303,6 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                           ),
                                           const SizedBox(width: 10),
 
-                                          // Date
                                           Expanded(
                                             child: Text(
                                               date,
@@ -297,18 +316,24 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                             ),
                                           ),
 
-                                          // Badge
                                           if (isAbsent)
                                             Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                  horizontal: 10, vertical: 3),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 3,
+                                                  ),
                                               decoration: BoxDecoration(
-                                                color:
-                                                AppColor.red.withValues(alpha: 0.10),
-                                                borderRadius: BorderRadius.circular(8),
+                                                color: AppColor.red.withValues(
+                                                  alpha: 0.10,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
                                               ),
                                               child: Text(
-                                                AppLocalizations.of(context)!.absence,
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.absence,
                                                 style: const TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w500,
@@ -319,20 +344,27 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                           else
                                             Row(
                                               children: [
-                                                _TimeBadge(time: timeIn, isIn: true),
+                                                _TimeBadge(
+                                                  time: timeIn,
+                                                  isIn: true,
+                                                ),
                                                 const SizedBox(width: 6),
-                                                _TimeBadge(time: timeOut, isIn: false),
+                                                _TimeBadge(
+                                                  time: timeOut,
+                                                  isIn: false,
+                                                ),
                                               ],
                                             ),
                                         ],
                                       ),
                                     ),
 
-                                    // Divider between rows only (not after last)
                                     if (!isLast)
                                       Divider(
                                         color: dark
-                                            ? AppColor.movBlue.withValues(alpha: 0.15)
+                                            ? AppColor.movBlue.withValues(
+                                                alpha: 0.15,
+                                              )
                                             : AppColor.softBlue,
                                         thickness: 0.6,
                                         height: 1,
@@ -379,22 +411,18 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                             Text(
                               AppLocalizations.of(context)!.submit_complaint,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
-                                color: dark ? AppColor.white : null,
-                              ),
+                                    color: dark ? AppColor.white : null,
+                                  ),
                             ),
                             Text(
                               AppLocalizations.of(context)!.report_incident,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
-                                color: dark ? AppColor.softGray : null,
-                              ),
+                                    color: dark ? AppColor.softGray : null,
+                                  ),
                             ),
                           ],
                         ),
@@ -416,6 +444,7 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
     );
   }
 }
+
 class _TimeBadge extends StatelessWidget {
   const _TimeBadge({required this.time, required this.isIn});
   final String time;
@@ -436,11 +465,7 @@ class _TimeBadge extends StatelessWidget {
       ),
       child: Text(
         time,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: fg,
-        ),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: fg),
       ),
     );
   }

@@ -1,10 +1,6 @@
-// ============================================================
-// qr_model.dart
-// ============================================================
-
 class QrModel {
   final String qrCode;
-  final String qrImage; // base64 string
+  final String qrImage;
   final DateTime expiresAt;
 
   QrModel({

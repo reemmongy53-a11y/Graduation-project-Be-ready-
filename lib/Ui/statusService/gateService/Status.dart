@@ -18,51 +18,67 @@ class Status extends StatefulWidget {
 }
 
 class _StatusState extends State<Status> {
-  bool get gateOn => UserSession.gateStatus.value;
+  bool get gateOn   => UserSession.gateStatus.value;
   bool get cameraOn => UserSession.cameraStatus.value;
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, _) {
-        final dark = themeProvider.isDarkMode;
+  void initState() {
+    super.initState();
+    // ✅ بنسمع التغييرات بشكل صحيح
+    UserSession.gateStatus.addListener(_refresh);
+    UserSession.cameraStatus.addListener(_refresh);
+  }
 
-        return BlocProvider(
-          create: (_) => DeviceCubit(
-            DeviceService(
-              baseUrl: 'https://smart-system-attendance-production-d4bd.up.railway.app',
-              token: UserSession.token,
-            ),
-          ),
-          child: BlocConsumer<DeviceCubit, DeviceState>(
+  void _refresh() {
+    if (mounted) setState(() {}); // ✅ mounted check
+  }
+
+  @override
+  void dispose() {
+    UserSession.gateStatus.removeListener(_refresh);
+    UserSession.cameraStatus.removeListener(_refresh);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ✅ BlocProvider فوق Consumer
+    return BlocProvider(
+      create: (_) => DeviceCubit(
+        DeviceService(
+          baseUrl: 'https://smart-system-attendance-production-d4bd.up.railway.app',
+          token: UserSession.token ?? '', // ✅ null safety
+        ),
+      ),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          final dark = themeProvider.isDarkMode;
+
+          return BlocConsumer<DeviceCubit, DeviceState>(
             listener: (context, state) {
               if (state is DeviceCommandDone) {
-                if (state.type == 'gate') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(gateOn
-                          ? AppLocalizations.of(context)!.gate_open
-                          : AppLocalizations.of(context)!.gate_close),
-                      backgroundColor: AppColor.green,
-                    ),
-                  );
-                } else if (state.type == 'camera') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(cameraOn
-                          ? AppLocalizations.of(context)!.camera_open
-                          : AppLocalizations.of(context)!.camera_close),
-                      backgroundColor: AppColor.green,
-                    ),
-                  );
-                }
+                // ✅ بنقرأ من state.isOn مش من الـ getter
+                final msg = state.type == 'gate'
+                    ? (state.isOn
+                    ? AppLocalizations.of(context)!.gate_open
+                    : AppLocalizations.of(context)!.gate_close)
+                    : (state.isOn
+                    ? AppLocalizations.of(context)!.camera_open
+                    : AppLocalizations.of(context)!.camera_close);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(msg),
+                    backgroundColor: AppColor.green,
+                  ),
+                );
               } else if (state is DeviceError) {
+                // ✅ Rollback — _refresh هتعمل setState أوتوماتيك
                 if (state.type == 'gate') {
                   UserSession.gateStatus.value = !gateOn;
                 } else {
                   UserSession.cameraStatus.value = !cameraOn;
                 }
-                setState(() {});
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('❌ ${state.message}'),
@@ -98,11 +114,11 @@ class _StatusState extends State<Status> {
                             isLoading: isCameraLoading,
                             isOn: cameraOn,
                             onToggle: () {
-                              final newState = !cameraOn;
-                              UserSession.cameraStatus.value = newState;
-                              setState(() {});
+                              final newVal = !cameraOn;
+                              UserSession.saveCameraStatus(newVal); // ✅ بدل .value = newVal
                               context.read<DeviceCubit>().sendCameraCommand(
-                                newState ? 'open_camera' : 'close_camera',
+                                newVal ? 'open_camera' : 'close_camera',
+                                newValue: newVal,
                               );
                             },
                           ),
@@ -122,11 +138,11 @@ class _StatusState extends State<Status> {
                             isLoading: isGateLoading,
                             isOn: gateOn,
                             onToggle: () {
-                              final newState = !gateOn;
-                              UserSession.gateStatus.value = newState;
-                              setState(() {});
+                              final newVal = !gateOn;
+                              UserSession.saveGateStatus(newVal); // ✅ بدل .value = newVal
                               context.read<DeviceCubit>().sendCommand(
-                                newState ? 'open_gate' : 'close_gate',
+                                newVal ? 'open_gate' : 'close_gate',
+                                newValue: newVal,
                               );
                             },
                           ),
@@ -137,13 +153,12 @@ class _StatusState extends State<Status> {
                 ],
               );
             },
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
-
 class _DeviceCardCompact extends StatelessWidget {
   final bool dark;
   final String imagePath;
@@ -176,10 +191,7 @@ class _DeviceCardCompact extends StatelessWidget {
         color: dark ? AppColor.darkBackground : AppColor.white,
         borderRadius: BorderRadius.circular(20),
         border: dark
-            ? Border.all(
-          color: AppColor.movBlue.withValues(alpha: 0.8),
-          width: 1.5,
-        )
+            ? Border.all(color: AppColor.movBlue.withValues(alpha: 0.8), width: 1.5)
             : null,
         boxShadow: [
           BoxShadow(
@@ -195,12 +207,7 @@ class _DeviceCardCompact extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(
-            imagePath,
-            width: 44,
-            height: 44,
-            fit: BoxFit.contain,
-          ),
+          Image.asset(imagePath, width: 44, height: 44, fit: BoxFit.contain),
           const SizedBox(height: 12),
           Text(
             title,
