@@ -24,26 +24,16 @@ class Qr extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               elevation: 0,
-              title: Text(
-                AppLocalizations.of(context)!.qr_code,
-                style: TextStyle(
-                  color: AppColor.royalBlue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+              title: Center(
+                child: Text(
+                  AppLocalizations.of(context)!.qr_code,
+                  style: TextStyle(
+                    color: AppColor.royalBlue,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
               ),
-              centerTitle: true,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColor.royalBlue),
-                onPressed: () => Navigator.pop(context),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.refresh_rounded, color: AppColor.royalBlue),
-                  onPressed: () => context.read<QrCubit>().getMyQr(),
-                  tooltip: AppLocalizations.of(context)!.refresh,
-                ),
-              ],
             ),
             body: BlocBuilder<QrCubit, QrState>(
               builder: (context, state) {

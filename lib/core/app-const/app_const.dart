@@ -12,4 +12,6 @@ abstract class AppConst {
   static const String resetPasswordEndPoint = 'auth/reset-password';
   static const String logoutEndPoint = 'auth/logout';
   static const String verifyOtpEndPoint = '/api/auth/verify-otp';
+  static const String parkingReportEndPoint = 'parking/report';
+
 }

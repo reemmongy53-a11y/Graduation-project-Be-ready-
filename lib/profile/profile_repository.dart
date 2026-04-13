@@ -7,5 +7,7 @@ abstract class ProfileRepository {
   Future<Either<Failure, ProfileModel>> updateProfile({
     required String name,
     required String email,
+    String? password,
+    String? plateNumber, // ✅ أضفنا
   });
 }

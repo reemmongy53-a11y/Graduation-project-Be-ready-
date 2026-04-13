@@ -20,6 +20,8 @@ abstract class AppImage {
   static const String redStatus = "assets/animation/Red Status.json";
   static const String darkGate = "assets/images/gate (2) 2.png";
   static const String camera = "assets/images/camira 1.png";
+  static const String parking = "assets/images/download.png";
+
 
 
 

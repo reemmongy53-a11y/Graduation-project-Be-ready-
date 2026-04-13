@@ -4,14 +4,11 @@ import 'package:new_project/Ui/statusService/gateService/device_cubit.dart';
 import 'package:new_project/Ui/statusService/gateService/device_service.dart';
 import 'package:new_project/Ui/statusService/gateService/device_state.dart';
 import 'package:new_project/core/user_session/user_session.dart';
-import 'package:new_project/custom/data_file.dart';
-import 'package:new_project/custom/scaffold.dart';
 import 'package:new_project/design/AppColor.dart';
 import 'package:new_project/design/AppImage.dart';
 import 'package:new_project/l10n/app_localizations.dart';
-
-bool isDarkMode(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark;
+import 'package:new_project/providers/ThemeProvider.dart';
+import 'package:provider/provider.dart';
 
 class Status extends StatefulWidget {
   const Status({super.key});
@@ -21,269 +18,232 @@ class Status extends StatefulWidget {
 }
 
 class _StatusState extends State<Status> {
-  bool get gateOn => UserSession.gateStatus.value;
+  bool get gateOn   => UserSession.gateStatus.value;
   bool get cameraOn => UserSession.cameraStatus.value;
 
   @override
-  Widget build(BuildContext context) {
-    final dark = isDarkMode(context);
+  void initState() {
+    super.initState();
+    // ✅ بنسمع التغييرات بشكل صحيح
+    UserSession.gateStatus.addListener(_refresh);
+    UserSession.cameraStatus.addListener(_refresh);
+  }
 
+  void _refresh() {
+    if (mounted) setState(() {}); // ✅ mounted check
+  }
+
+  @override
+  void dispose() {
+    UserSession.gateStatus.removeListener(_refresh);
+    UserSession.cameraStatus.removeListener(_refresh);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ✅ BlocProvider فوق Consumer
     return BlocProvider(
       create: (_) => DeviceCubit(
         DeviceService(
           baseUrl: 'https://smart-system-attendance-production-d4bd.up.railway.app',
-          token: UserSession.token,
+          token: UserSession.token ?? '', // ✅ null safety
         ),
       ),
-      child: BlocConsumer<DeviceCubit, DeviceState>(
-        listener: (context, state) {
-          if (state is DeviceCommandDone) {
-            if (state.type == 'statusService') {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(gateOn ? AppLocalizations.of(context)!.gate_open : AppLocalizations.of(context)!.gate_close),
-                  backgroundColor: AppColor.green,
-                ),
-              );
-            } else if (state.type == 'camera') {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(cameraOn ? AppLocalizations.of(context)!.camera_open : AppLocalizations.of(context)!.camera_close),
-                  backgroundColor: AppColor.green,
-                ),
-              );
-            }
-          } else if (state is DeviceError) {
-            if (state.type == 'gate') {
-              UserSession.gateStatus.value = !gateOn;
-            } else {
-              UserSession.cameraStatus.value = !cameraOn;
-            }
-            setState(() {});
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('❌ ${state.message}'),
-                backgroundColor: AppColor.red,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          final isLoading = state is DeviceLoading || state is DeviceCommandSent;
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          final dark = themeProvider.isDarkMode;
 
-          return CustomScaffold(
-            image: AppImage.Logo,
-            icons: Icon(Icons.arrow_forward_ios, color: AppColor.royalBlue, size: 30),
-            onIconPressed: () => Navigator.pop(context),
-            body: SingleChildScrollView(
-              child: Column(
-                children: [
-                  DataFile(name: UserSession.name, email: ''),
-                  const SizedBox(height: 20),
-              
-                  _DeviceCard(
-                    dark: dark,
-              
-                    backgroundColor: dark ? AppColor.darkBackground : AppColor.white,
-                    borderColor: dark
-                        ? AppColor.movBlue.withValues(alpha: 0.8)
-                        : AppColor.softBlue,
-                    title: AppLocalizations.of(context)!.gate_control,
-                    titleColor: dark ? AppColor.white : AppColor.black,
-                    lines: [
-                      _InfoLine(label: AppLocalizations.of(context)!.gate, value: AppLocalizations.of(context)!.d1, dark: dark),
-                      _InfoLine(label:AppLocalizations.of(context)!.status, value: gateOn ? AppLocalizations.of(context)!.open_gate : AppLocalizations.of(context)!.close_gate, dark: dark),
-                      _InfoLine(label: AppLocalizations.of(context)!.connection, value: AppLocalizations.of(context)!.connected, dark: dark),
-                    ],
-                    isLoading: isLoading,
-                    isOn: gateOn,
-                    onToggle: () {
-                      final newState = !gateOn;
-                      UserSession.gateStatus.value = newState;
-                      setState(() {});
-                      context.read<DeviceCubit>().sendCommand(
-                        newState ? AppLocalizations.of(context)!.open_gate : AppLocalizations.of(context)!.close_gate,
-                      );
-                    },
-                    image: AppImage.darkGate,
+          return BlocConsumer<DeviceCubit, DeviceState>(
+            listener: (context, state) {
+              if (state is DeviceCommandDone) {
+                // ✅ بنقرأ من state.isOn مش من الـ getter
+                final msg = state.type == 'gate'
+                    ? (state.isOn
+                    ? AppLocalizations.of(context)!.gate_open
+                    : AppLocalizations.of(context)!.gate_close)
+                    : (state.isOn
+                    ? AppLocalizations.of(context)!.camera_open
+                    : AppLocalizations.of(context)!.camera_close);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(msg),
+                    backgroundColor: AppColor.green,
                   ),
-              
-                  const SizedBox(height: 20),
-                  _DeviceCard(
-                    dark: dark,
-                    backgroundColor: dark ? AppColor.darkBackground : AppColor.royalBlue,
-                    borderColor: dark
-                        ? AppColor.movBlue.withValues(alpha: 0.8)
-                        : Colors.transparent,
-                    title: AppLocalizations.of(context)!.control_of_camera,
-                    titleColor: AppColor.white,
-                    lines: [
-                      _InfoLine(label: AppLocalizations.of(context)!.camera, value: AppLocalizations.of(context)!.face_id, dark: dark, forceWhite: !dark),
-                      _InfoLine(label:AppLocalizations.of(context)!.status, value: cameraOn ?AppLocalizations.of(context)!.open_camera : AppLocalizations.of(context)!.close_camera, dark: dark, forceWhite: !dark),
-                      _InfoLine(label: AppLocalizations.of(context)!.connection, value: AppLocalizations.of(context)!.connected, dark: dark, forceWhite: !dark),
-                    ],
-                    isLoading: isLoading,
-                    isOn: cameraOn,
-                    onToggle: () {
-                      final newState = !cameraOn;
-                      UserSession.cameraStatus.value = newState;
-                      setState(() {});
-                      context.read<DeviceCubit>().sendCameraCommand(
-                        newState ? AppLocalizations.of(context)!.open_camera : AppLocalizations.of(context)!.close_camera,
-                      );
-                    },
-                    image: AppImage.camera,
+                );
+              } else if (state is DeviceError) {
+                // ✅ Rollback — _refresh هتعمل setState أوتوماتيك
+                if (state.type == 'gate') {
+                  UserSession.gateStatus.value = !gateOn;
+                } else {
+                  UserSession.cameraStatus.value = !cameraOn;
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('❌ ${state.message}'),
+                    backgroundColor: AppColor.red,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              final isGateLoading =
+                  state is DeviceGateLoading || state is DeviceGateCommandSent;
+              final isCameraLoading =
+                  state is DeviceCameraLoading || state is DeviceCameraCommandSent;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _DeviceCardCompact(
+                            dark: dark,
+                            imagePath: AppImage.camiraDark,
+                            title: AppLocalizations.of(context)!.control_of_camera,
+                            deviceLabel: AppLocalizations.of(context)!.camera,
+                            deviceValue: AppLocalizations.of(context)!.face_id,
+                            statusLabel: AppLocalizations.of(context)!.status,
+                            statusValue: cameraOn
+                                ? AppLocalizations.of(context)!.open_camera
+                                : AppLocalizations.of(context)!.close_camera,
+                            isLoading: isCameraLoading,
+                            isOn: cameraOn,
+                            onToggle: () {
+                              final newVal = !cameraOn;
+                              UserSession.saveCameraStatus(newVal); // ✅ بدل .value = newVal
+                              context.read<DeviceCubit>().sendCameraCommand(
+                                newVal ? 'open_camera' : 'close_camera',
+                                newValue: newVal,
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _DeviceCardCompact(
+                            dark: dark,
+                            imagePath: AppImage.gateDark,
+                            title: AppLocalizations.of(context)!.gate_control,
+                            deviceLabel: AppLocalizations.of(context)!.gate,
+                            deviceValue: AppLocalizations.of(context)!.d1,
+                            statusLabel: AppLocalizations.of(context)!.status,
+                            statusValue: gateOn
+                                ? AppLocalizations.of(context)!.open_gate
+                                : AppLocalizations.of(context)!.close_gate,
+                            isLoading: isGateLoading,
+                            isOn: gateOn,
+                            onToggle: () {
+                              final newVal = !gateOn;
+                              UserSession.saveGateStatus(newVal); // ✅ بدل .value = newVal
+                              context.read<DeviceCubit>().sendCommand(
+                                newVal ? 'open_gate' : 'close_gate',
+                                newValue: newVal,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
-              ),
-            ),
+              );
+            },
           );
         },
       ),
     );
   }
 }
-class _DeviceCard extends StatelessWidget {
+class _DeviceCardCompact extends StatelessWidget {
   final bool dark;
-  final Color backgroundColor;
-  final Color borderColor;
+  final String imagePath;
   final String title;
-  final Color titleColor;
-  final List<_InfoLine> lines;
+  final String deviceLabel;
+  final String deviceValue;
+  final String statusLabel;
+  final String statusValue;
   final bool isLoading;
   final bool isOn;
   final VoidCallback onToggle;
-  final String image;
 
-  const _DeviceCard({
+  const _DeviceCardCompact({
     required this.dark,
-    required this.backgroundColor,
-    required this.borderColor,
+    required this.imagePath,
     required this.title,
-    required this.titleColor,
-    required this.lines,
+    required this.deviceLabel,
+    required this.deviceValue,
+    required this.statusLabel,
+    required this.statusValue,
     required this.isLoading,
     required this.isOn,
     required this.onToggle,
-    required this.image,
   });
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final cardWidth = screenWidth - 32;
-    final imageSize = cardWidth * 0.38;
     return Container(
-      width: cardWidth,
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor, width: 1.5),
+        color: dark ? AppColor.darkBackground : AppColor.white,
+        borderRadius: BorderRadius.circular(20),
+        border: dark
+            ? Border.all(color: AppColor.movBlue.withValues(alpha: 0.8), width: 1.5)
+            : null,
         boxShadow: [
           BoxShadow(
             color: dark
-                ? Colors.black.withValues(alpha: 0.4)
-                : AppColor.movBlue.withValues(alpha: 0.1),
-            blurRadius: 16,
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: titleColor,
-              ),
+          Image.asset(imagePath, width: 44, height: 44, fit: BoxFit.contain),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: dark ? AppColor.white : AppColor.black,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "$deviceLabel : $deviceValue",
+            style: TextStyle(
+              fontSize: 12,
+              color: dark
+                  ? AppColor.white.withValues(alpha: 0.6)
+                  : Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            "$statusLabel : $statusValue",
+            style: TextStyle(
+              fontSize: 12,
+              color: dark
+                  ? AppColor.white.withValues(alpha: 0.6)
+                  : Colors.grey.shade600,
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ...lines,
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: isLoading ? null : onToggle,
-                      child: Opacity(
-                        opacity: isLoading ? 0.5 : 1.0,
-                        child: Container(
-                          width: cardWidth * 0.48,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: dark ? AppColor.black : AppColor.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: dark
-                                  ? AppColor.movBlue.withValues(alpha: 0.6)
-                                  : AppColor.royalBlue,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                AnimatedAlign(
-                                  duration: const Duration(milliseconds: 200),
-                                  alignment: isOn
-                                      ? Alignment.centerRight
-                                      : Alignment.centerLeft,
-                                  child: Container(
-                                    width: 48,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: AppColor.royalBlue,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: isLoading
-                                        ? const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                        color: AppColor.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                        : const Icon(
-                                      Icons.fast_forward,
-                                      color: AppColor.white,
-                                      size: 18,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: isOn ? 0 : 16),
-                                  child: Text(
-                                    isOn ? AppLocalizations.of(context)!.off : AppLocalizations.of(context)!.on,
-                                    style: TextStyle(
-
-                                      color: dark ? AppColor.white : AppColor.royalBlue,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Image.asset(image, width: imageSize, height: imageSize),
-            ],
+          GestureDetector(
+            onTap: isLoading ? null : onToggle,
+            child: Opacity(
+              opacity: isLoading ? 0.5 : 1.0,
+              child: _CustomToggle(isOn: isOn, isLoading: isLoading),
+            ),
           ),
         ],
       ),
@@ -291,32 +251,47 @@ class _DeviceCard extends StatelessWidget {
   }
 }
 
-class _InfoLine extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool dark;
-  final bool forceWhite;
+class _CustomToggle extends StatelessWidget {
+  final bool isOn;
+  final bool isLoading;
 
-  const _InfoLine({
-    required this.label,
-    required this.value,
-    required this.dark,
-    this.forceWhite = false,
-  });
+  const _CustomToggle({required this.isOn, required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
-    final color = forceWhite
-        ? AppColor.white
-        : dark
-        ? AppColor.white
-        : AppColor.black;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Text(
-        "$label : $value",
-        style: TextStyle(color: color, fontSize: 13),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 52,
+      height: 28,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: isOn ? AppColor.royalBlue : Colors.grey.shade300,
+      ),
+      child: Stack(
+        children: [
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 200),
+            alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              margin: const EdgeInsets.all(3),
+              width: 22,
+              height: 22,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: isLoading
+                  ? const Padding(
+                padding: EdgeInsets.all(4),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColor.royalBlue,
+                ),
+              )
+                  : null,
+            ),
+          ),
+        ],
       ),
     );
   }

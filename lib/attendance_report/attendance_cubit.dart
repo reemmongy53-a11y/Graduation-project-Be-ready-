@@ -13,7 +13,14 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     final result = await _repository.getReport();
     result.fold(
           (failure) => emit(AttendanceErrorState(message: failure.message)),
-          (model) => emit(AttendanceSuccessState(model: model)),
+          (model) {
+        // ✅ Print هنا عشان نشوف البيانات الجاية من الـ API
+        print("✅ Present: ${model.summary.presentDays}");
+        print("❌ Absent: ${model.summary.absentDays}");
+        print("⏰ Late: ${model.summary.lateDays}");
+
+        emit(AttendanceSuccessState(model: model));
+      },
     );
   }
 }

@@ -16,7 +16,11 @@ class AppFormField extends StatefulWidget {
     this.suffixIcon,
     this.controller,
     this.validator,
+
+    this.readOnly = false,
+    this.initialValue,
     super.key,
+
   });
 
   final String? label;
@@ -27,6 +31,9 @@ class AppFormField extends StatefulWidget {
   final String? hintText;
   final TextEditingController? controller;
   final validator;
+
+  final bool readOnly;
+  final String? initialValue;
 
   @override
   State<AppFormField> createState() => _AppFormFieldState();

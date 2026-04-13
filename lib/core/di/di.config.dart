@@ -1,3 +1,14 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
+// **************************************************************************
+// InjectableConfigGenerator
+// **************************************************************************
+
+// ignore_for_file: type=lint
+// coverage:ignore-file
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
@@ -23,6 +34,11 @@ import '../../forgetPassword/forgot_password_cubit.dart' as _i1036;
 import '../../forgetPassword/reset_password_cubit.dart' as _i387;
 import '../../forgetPassword/verify_otp_cubit.dart' as _i51;
 import '../../logOut/logout_cubit.dart' as _i913;
+import '../../parking%20report/ParkingCubit.dart' as _i149;
+import '../../parking%20report/ParkingDataSource.dart' as _i5;
+import '../../parking%20report/ParkingDataSourceImpl.dart' as _i709;
+import '../../parking%20report/ParkingRepository.dart' as _i869;
+import '../../parking%20report/ParkingRepositoryImpl.dart' as _i539;
 import '../../profile/profile_cubit.dart' as _i985;
 import '../../profile/profile_data_source.dart' as _i568;
 import '../../profile/profile_data_source_impl.dart' as _i758;
@@ -40,6 +56,7 @@ import '../../Ui/auth_Screen/domain/auth_repository/auth-repository.dart'
 import '../../vehicle/vehicle_cubit.dart' as _i1019;
 
 extension GetItInjectableX on _i174.GetIt {
+  // initializes the registration of main-scope dependencies inside of GetIt
   _i174.GetIt init({
     String? environment,
     _i526.EnvironmentFilter? environmentFilter,
@@ -58,6 +75,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i920.LoginCubit>(
       () => _i920.LoginCubit(gh<_i635.LoginRepository>()),
+    );
+    gh.factory<_i5.ParkingDataSource>(
+      () => _i709.ParkingDataSourceImpl(gh<_i361.Dio>()),
     );
     gh.factory<_i527.QrDataSource>(
       () => _i882.QrDataSourceImpl(gh<_i361.Dio>()),
@@ -97,8 +117,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i741.AttendanceCubit>(
       () => _i741.AttendanceCubit(gh<_i47.AttendanceRepository>()),
     );
+    gh.factory<_i869.ParkingRepository>(
+      () => _i539.ParkingRepositoryImpl(gh<_i5.ParkingDataSource>()),
+    );
     gh.factory<_i985.ProfileCubit>(
       () => _i985.ProfileCubit(gh<_i305.ProfileRepository>()),
+    );
+    gh.factory<_i149.ParkingCubit>(
+      () => _i149.ParkingCubit(gh<_i869.ParkingRepository>()),
     );
     return this;
   }

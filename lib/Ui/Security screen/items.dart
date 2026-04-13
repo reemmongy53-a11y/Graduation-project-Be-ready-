@@ -39,8 +39,8 @@ class Items extends StatelessWidget {
                 children: [
                   Image.asset(
                     image,
-                    width: itemWidth * 0.55,
-                    height: itemWidth * 0.55,
+                    width: itemWidth * 0.50,
+                    height: itemWidth * 0.50,
                   ),
                   const SizedBox(height: 5),
                   Padding(

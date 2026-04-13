@@ -14,6 +14,7 @@ class ProfileDataSourceImpl implements ProfileDataSource {
     headers: {'Authorization': 'Bearer ${UserSession.token}'},
   );
 
+
   @override
   Future<ProfileModel> getProfile() async {
     final response = await dio.get(
@@ -21,6 +22,9 @@ class ProfileDataSourceImpl implements ProfileDataSource {
       options: _options,
     );
     if (response.statusCode == 200) {
+      print('====== API Response ======');
+      print(response.data); // ✅ شوف الـ output في الـ console
+      print('==========================');
       return ProfileModel.fromJson(response.data);
     } else {
       throw Exception('Failed to fetch profile');
@@ -31,16 +35,31 @@ class ProfileDataSourceImpl implements ProfileDataSource {
   Future<ProfileModel> updateProfile({
     required String name,
     required String email,
+    String? password,
+    String? plateNumber,
   }) async {
+    final Map<String, dynamic> data = {
+      'name': name,
+      'email': email,
+    };
+    if (password != null && password.isNotEmpty) {
+      data['password'] = password;
+    }
+    if (plateNumber != null && plateNumber.isNotEmpty) {
+      data['plateNamber'] = plateNumber;
+    }
     final response = await dio.put(
       AppConst.updateProfileEndPoint,
-      data: {'name': name, 'email': email},
+      data: data,
       options: _options,
     );
     if (response.statusCode == 200) {
+      print('====== Update Response ======');
+      print(response.data);
+      print('=============================');
       return ProfileModel.fromJson(response.data);
     } else {
-      throw Exception('Failed to update profile');
+      throw Exception('Failed to update profile'); // ✅ أضفنا
     }
   }
 }

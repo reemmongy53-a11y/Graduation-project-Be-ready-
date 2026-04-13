@@ -51,19 +51,10 @@ class _LoginFormState extends State<LoginForm> {
                 UserSession.employeeId = state.authResult.user.id;
                 await UserSession.save();
 
-                if (state.authResult.user.role == 'employee') {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    AppRoutes.employee.name,
-                    arguments: state.authResult.user.name,
-                  );
-                } else {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    AppRoutes.securityScreen.name,
-                    arguments: state.authResult.user.name,
-                  );
-                }
+                Navigator.pushReplacementNamed(
+                  context,
+                  AppRoutes.mainScreen.name,
+                );
               } else if (state is LoginErrorState) {
                 if (_isDialogShowing) {
                   _isDialogShowing = false;

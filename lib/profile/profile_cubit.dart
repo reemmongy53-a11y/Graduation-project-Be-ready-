@@ -7,6 +7,7 @@ import 'profile_state.dart';
 @injectable
 class ProfileCubit extends Cubit<ProfileState> {
   final ProfileRepository _repository;
+
   ProfileCubit(this._repository) : super(ProfileInitialState());
 
   Future<void> getProfile() async {
@@ -15,9 +16,9 @@ class ProfileCubit extends Cubit<ProfileState> {
     result.fold(
           (failure) => emit(ProfileErrorState(message: failure.message)),
           (model) {
-
         UserSession.employeeId = model.id;
         UserSession.role = model.role;
+        UserSession.employeeNumber = model.employeeNumber;
         UserSession.save();
         emit(ProfileSuccessState(model: model));
       },
@@ -27,9 +28,16 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> updateProfile({
     required String name,
     required String email,
+    String? password,
+    String? plateNumber,
   }) async {
     emit(ProfileUpdateLoadingState());
-    final result = await _repository.updateProfile(name: name, email: email);
+    final result = await _repository.updateProfile(
+      name: name,
+      email: email,
+      password: password,
+      plateNumber: plateNumber,
+    );
     result.fold(
           (failure) => emit(ProfileErrorState(message: failure.message)),
           (model) {
@@ -37,6 +45,8 @@ class ProfileCubit extends Cubit<ProfileState> {
         UserSession.email = model.email;
         UserSession.employeeId = model.id;
         UserSession.role = model.role;
+        UserSession.password = password ?? UserSession.password;
+        UserSession.employeeNumber = model.employeeNumber;
 
         UserSession.save();
         emit(ProfileUpdateSuccessState(model: model));

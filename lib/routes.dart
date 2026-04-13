@@ -16,6 +16,8 @@ enum AppRoutes{
  forgotPassword("forgotPassword"),
  checkEmail("checkEmail"),
  newPassword("newPassword"),
+ parkingReport("parkingReport"),
+ mainScreen("MainScreen")
 
 
 

@@ -1,6 +1,9 @@
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../cach/appSharedPreferences.dart';
+
 
 class ThemeProvider extends ChangeNotifier{
   ThemeMode _themeMode = ThemeMode.system;
@@ -19,7 +22,7 @@ class ThemeProvider extends ChangeNotifier{
   List <ThemeMode>  getModes(){
     return [
       ThemeMode.light,
-      ThemeMode.dark,
+    ThemeMode.dark,
     ];
   }
   ThemeMode getSelectedThemeMode(){

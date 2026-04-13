@@ -8,18 +8,19 @@ import 'package:new_project/design/AppColor.dart';
 import 'package:new_project/design/AppImage.dart';
 import 'package:new_project/l10n/app_localizations.dart';
 import 'package:new_project/vehicle/vehicle_cubit.dart';
+import 'package:new_project/vehicle/vehicle_model.dart';
 import 'package:new_project/vehicle/vehicle_state.dart';
 import 'package:provider/provider.dart';
 import '../providers/ThemeProvider.dart';
 
-class VehicleReport extends StatefulWidget {
-  const VehicleReport({super.key});
+class VehicleEntry extends StatefulWidget {
+  const VehicleEntry({super.key});
 
   @override
-  State<VehicleReport> createState() => _VehicleReportState();
+  State<VehicleEntry> createState() => _VehicleEntryState();
 }
 
-class _VehicleReportState extends State<VehicleReport> {
+class _VehicleEntryState extends State<VehicleEntry> {
   final plateController = TextEditingController();
   bool _isDialogShowing = false;
 
@@ -46,7 +47,9 @@ class _VehicleReportState extends State<VehicleReport> {
                     showDialog(
                       context: context,
                       barrierDismissible: false,
-                      builder: (_) => const Center(child: CircularProgressIndicator()),
+                      builder: (_) => const Center(
+                        child: CircularProgressIndicator(),
+                      ),
                     );
                   } else if (state is VehicleSuccessState) {
                     if (_isDialogShowing) {
@@ -56,7 +59,7 @@ class _VehicleReportState extends State<VehicleReport> {
                     plateController.clear();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('${state.model.plateNumber}'),
+                        content: Text(' ${state.model.plateNumber}'),
                         backgroundColor: Colors.green,
                       ),
                     );
@@ -67,7 +70,7 @@ class _VehicleReportState extends State<VehicleReport> {
                     }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('❌ ${state.message}'),
+                        content: Text(' ${state.message}'),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -75,29 +78,40 @@ class _VehicleReportState extends State<VehicleReport> {
                 },
                 child: CustomScaffold(
                   image: AppImage.Logo,
-                  icons: Icon(Icons.arrow_forward_ios, color: AppColor.royalBlue, size: 30),
+                  icons: Icon(
+                    Icons.arrow_forward_ios,
+                    color: AppColor.royalBlue,
+                    size: 30,
+                  ),
                   onIconPressed: () => Navigator.pop(context),
                   body: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-
                         Container(
-                          padding: EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: isDark ? AppColor.navy : AppColor.primary,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.directions_car, color: AppColor.royalBlue, size: 32),
-                              SizedBox(width: 12),
+                              Icon(
+                                Icons.directions_car,
+                                color: AppColor.royalBlue,
+                                size: 32,
+                              ),
+                              const SizedBox(width: 12),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    AppLocalizations.of(context)!.vehicle_registration,
+                                    AppLocalizations.of(context)!
+                                        .vehicle_registration,
                                     style: TextStyle(
                                       color: AppColor.royalBlue,
                                       fontSize: 18,
@@ -105,9 +119,12 @@ class _VehicleReportState extends State<VehicleReport> {
                                     ),
                                   ),
                                   Text(
-                                    AppLocalizations.of(context)!.register_vehicle,
+                                    AppLocalizations.of(context)!
+                                        .register_vehicle,
                                     style: TextStyle(
-                                      color: isDark ? AppColor.softGray : Colors.grey,
+                                      color: isDark
+                                          ? AppColor.softGray
+                                          : Colors.grey,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -117,65 +134,89 @@ class _VehicleReportState extends State<VehicleReport> {
                           ),
                         ),
 
-                        SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-
-                        Container(
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: isDark ? AppColor.navy : AppColor.primary,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.badge_outlined, color: AppColor.royalBlue),
-                              SizedBox(width: 8),
-                              Text(
-                                '${AppLocalizations.of(context)!.Employee_ID} ${UserSession.employeeId}',
-                                style: TextStyle(color: AppColor.royalBlue),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.badge_outlined,
+                              color: AppColor.royalBlue,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '${AppLocalizations.of(context)!.Employee_ID}:  ${UserSession.employeeNumber}',
+                                style: TextStyle(
+                                  color: AppColor.royalBlue,
+                                  fontSize: 13,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
 
-                        SizedBox(height: 16),
-
-
+                        const SizedBox(height: 20),
                         AppFormField(
                           label: AppLocalizations.of(context)!.plate_number,
                           hintText: AppLocalizations.of(context)!.e_g,
                           controller: plateController,
                         ),
 
-                        SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
+                        // ✅ Register Button
                         BlocBuilder<VehicleCubit, VehicleState>(
                           builder: (context, state) {
+                            final isLoading = state is VehicleLoadingState;
                             return ElevatedButton.icon(
-                              onPressed: state is VehicleLoadingState
+                              onPressed: isLoading
                                   ? null
                                   : () {
-                                if (plateController.text.trim().isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                if (plateController.text
+                                    .trim()
+                                    .isEmpty) {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(
                                     SnackBar(
-                                      content: Text(AppLocalizations.of(context)!.please_enter_number),
+                                      content: Text(
+                                        AppLocalizations.of(context)!
+                                            .please_enter_number,
+                                      ),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
                                   return;
                                 }
                                 context.read<VehicleCubit>().registerVehicle(
-                                  employeeId: UserSession.employeeId,
                                   plateNumber: plateController.text.trim(),
+
                                 );
                               },
-                              icon: const Icon(Icons.app_registration_rounded),
+                              icon: isLoading
+                                  ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                                  : const Icon(
+                                  Icons.app_registration_rounded),
                               label: Text(
-                               AppLocalizations.of(context)!.register_car,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                AppLocalizations.of(context)!.register_car,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(vertical: 14),
+                                backgroundColor: AppColor.royalBlue,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),

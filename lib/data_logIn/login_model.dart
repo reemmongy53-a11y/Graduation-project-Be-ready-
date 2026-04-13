@@ -64,7 +64,8 @@ class LoginEmployee {
       role: role ?? '',
       qrCode: qrCode?.toString() ?? '',
       qrExpires: qrExpires?.toString() ?? '',
-      employeeNumber: employeeNumber ?? '', id: '',
+      employeeNumber: employeeNumber ?? '',
+      id: id ?? '',
     );
   }
 }

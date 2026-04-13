@@ -9,6 +9,9 @@ class CustomScaffold extends StatelessWidget {
     this.icons,
     this.route,
     this.onIconPressed,
+    this.bottomNavigationBar,
+    this.floatingActionButton,
+    this.floatingActionButtonLocation,
   });
 
   final String? image;
@@ -16,6 +19,9 @@ class CustomScaffold extends StatelessWidget {
   final Widget body;
   final String? route;
   final VoidCallback? onIconPressed;
+  final Widget? bottomNavigationBar;
+  final Widget? floatingActionButton;
+  final FloatingActionButtonLocation? floatingActionButtonLocation;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +43,10 @@ class CustomScaffold extends StatelessWidget {
         ],
       ),
       body: body,
+      bottomNavigationBar: bottomNavigationBar,
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation:
+      floatingActionButtonLocation ?? FloatingActionButtonLocation.endFloat,
     );
   }
 }

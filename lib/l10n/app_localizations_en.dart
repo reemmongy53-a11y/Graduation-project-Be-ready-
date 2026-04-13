@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get get_started => 'Get Started now';
+  String get get_started => 'Be Ready';
 
   @override
   String get create_account => 'Create an account or log in to explore about our app';
@@ -400,6 +400,87 @@ class AppLocalizationsEn extends AppLocalizations {
   String get entry => 'Entry';
   @override
   String get exit => 'Exit';
+  @override
+  String get parking => 'Parking';
+  @override
+  String get no_data => 'No parking data available';
+  @override
+  String get report => 'Report';
+  @override
+  String get complaint => 'Complaint';
+  @override
+  String get home => 'Home';
+  @override
+  String get control  => 'Control System';
+  @override
+  String get monthly  => 'Monthly Overview';
+  @override
+  String get check_in  => 'Check In';
+  @override
+  String get check_out  => 'Check Out';
+  @override
+  String get total  => 'Total';
+  @override
+  String get week  => 'Week';
+  @override
+  String get month  => 'Month';
+  @override
+  String get total_day  => 'Total Days';
+  @override
+  String get no_attendance_details => 'The month has just started.\nAttendance data will appear as days pass.';
+  @override
+  String get no_report => 'No report yet';
+  @override
+  String get jan  => 'January';
+  @override
+  String get feb  => 'February';
+  @override
+  String get mar  => 'March';
+  @override
+  String get apr  => 'April';
+  @override
+  String get may  => 'May';
+  @override
+  String get jun  => 'June';
+  @override
+  String get jul  => 'July';
+  @override
+  String get aug  => 'August';
+  @override
+  String get sep  => 'September';
+  @override
+  String get oct  => 'October';
+  @override
+  String get nov  => 'November';
+  @override
+  String get dec  => 'December';
+  @override
+  String get day_mon => 'Mon';
+
+  @override
+  String get day_tue => 'Tue';
+
+  @override
+  String get day_wed => 'Wed';
+
+  @override
+  String get day_thu => 'Thu';
+
+  @override
+  String get day_fri => 'Fri';
+
+  @override
+  String get day_sat => 'Sat';
+
+  @override
+  String get day_sun => 'Sun';
+  @override
+  String get  employee_number=> 'Employee Number';
+  @override
+  String get edit => 'Edit Data';
+
+
+
 
 
 

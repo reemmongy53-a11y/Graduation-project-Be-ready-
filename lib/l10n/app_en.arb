@@ -1,5 +1,5 @@
 {
-  "get_started": "Get Started now",
+  "get_started": "Be Ready",
   "create_account": "Create an account or log in to explore about our app",
   "log_in": "Log In",
   "sign_up": "Sign Up",
@@ -133,7 +133,46 @@
   "late": "late",
   "absent": "absent",
   "entry": "entry",
-  "exit": "Exit"
+  "exit": "Exit",
+  "parking": "Parking",
+  "no_data": "No parking reports",
+  "report": "Report",
+  "complaint": "Complaint",
+  "home": "Home",
+  "control": "Control System",
+  "monthly": "Monthly Report",
+  "check_in": "Check In",
+  "check_out": "Check Out",
+  "total": "Total",
+  "week": "Week",
+  "month": "Month",
+  "total_day": "Total Days",
+  "no_attendance_details": " The month has just started.\nAttendance data will appear as days pass.",
+  "no_report": "No Report Yet",
+  "jan": "jan",
+  "feb": "feb",
+  "mar":"mar",
+  "apr":"apr",
+  "may":"may",
+  "jun":"jun",
+  "jul":"jul",
+  "aug": "aug",
+  "sep": "sep",
+  "oct": "oct",
+  "nov": "nov",
+  "dec": "dec",
+  "day_mon": "Mon",
+  "day_tue": "Tue",
+  "day_wed": "Wed",
+  "day_thu": "Thu",
+  "day_fri": "Fri",
+  "day_sat": "Sat",
+  "day_sun": "Sun",
+  "employee_number": "Employee Number",
+  "edit": "Edit Data"
+
+
+
 
 
 

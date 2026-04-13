@@ -27,9 +27,16 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, ProfileModel>> updateProfile({
     required String name,
     required String email,
+    String? password,
+    String? plateNumber, // ✅ أضفنا
   }) async {
     try {
-      final result = await _dataSource.updateProfile(name: name, email: email);
+      final result = await _dataSource.updateProfile(
+        name: name,
+        email: email,
+        password: password,
+        plateNumber: plateNumber, // ✅ أضفنا
+      );
       return Right(result);
     } on DioException catch (e) {
       return Left(ServerFailure(message: e.response?.data['message'] ?? 'Something went wrong'));

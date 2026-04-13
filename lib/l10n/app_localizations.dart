@@ -757,6 +757,48 @@ String get late;
 String get absent;
 String get entry;
 String get exit;
+String get parking;
+String get no_data;
+  String get report;
+  String get complaint;
+  String get home;
+  String get control;
+  String get monthly;
+  String get check_in;
+  String get check_out;
+  String get total;
+  String get week;
+  String get month;
+  String get total_day;
+  String get no_attendance_details;
+  String get no_report;
+  String get jan;
+  String get feb;
+  String get mar;
+  String get apr;
+  String get may;
+  String get jun;
+  String get jul;
+  String get aug;
+  String get sep;
+  String get oct;
+  String get nov;
+  String get dec;
+  String get day_mon;
+  String get day_tue;
+  String get day_wed;
+  String get day_thu;
+  String get day_fri;
+  String get day_sat;
+  String get day_sun;
+  String get employee_number;
+  String get edit;
+
+
+
+
+
+
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

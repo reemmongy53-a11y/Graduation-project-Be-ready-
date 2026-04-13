@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:new_project/Ui/Security%20screen/StatusBox.dart';
 import 'package:new_project/Ui/Security%20screen/items.dart';
+import 'package:new_project/Ui/statusService/gateService/Status.dart';
 import 'package:new_project/core/user_session/user_session.dart';
 import 'package:new_project/custom/News%20summary/newsSummary.dart';
 import 'package:new_project/custom/data_file.dart';
@@ -21,9 +21,10 @@ class SecurityScreen extends StatefulWidget {
 }
 
 class _SecurityScreenState extends State<SecurityScreen> {
+  int _currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
-
     final dark = Provider.of<ThemeProvider>(context).isDarkMode;
 
     return CustomScaffold(
@@ -34,7 +35,9 @@ class _SecurityScreenState extends State<SecurityScreen> {
           color: dark ? AppColor.darkBackground : AppColor.white,
           context: context,
           position: const RelativeRect.fromLTRB(1000, 80, 0, 0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           items: [
             PopupMenuItem(
               enabled: false,
@@ -47,6 +50,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DataFile(name: UserSession.name, email: ''),
@@ -61,96 +65,44 @@ class _SecurityScreenState extends State<SecurityScreen> {
                   date2: "7",
                 ),
               ),
-              const SizedBox(height: 10),
+
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  AppLocalizations.of(context)!.gate_control,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 20),
+                  AppLocalizations.of(context)!.control,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(fontSize: 20),
+                ),
+              ),
+              Status(),
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: Text(
+                  AppLocalizations.of(context)!.quick_actions,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(fontSize: 20),
                 ),
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ValueListenableBuilder<bool>(
-                    valueListenable: UserSession.gateStatus,
-                    builder: (context, isOpen, _) {
-                      return StatusBox(
-                        image: AppImage.gateDark,
-                        title: AppLocalizations.of(context)!.external_gate,
-                        description: isOpen ? AppLocalizations.of(context)!.open : AppLocalizations.of(context)!.close,
-                        isOpen: isOpen,
-                        onChanged: (value) {
-                          UserSession.gateStatus.value = value;
-                        },
-                      );
-                    },
+                  Items(
+                    image: AppImage.qrLight,
+                    title: AppLocalizations.of(context)!.qr,
+                    routeName: AppRoutes.QR.name,
                   ),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: UserSession.cameraStatus,
-                    builder: (context, isOn, _) {
-                      return StatusBox(
-                        image: AppImage.camiraDark,
-                        title: AppLocalizations.of(context)!.gate_camera,
-                        description: isOn ? AppLocalizations.of(context)!.work : AppLocalizations.of(context)!.close ,
-                        isOpen: isOn,
-                        onChanged: (value) {
-                          UserSession.cameraStatus.value = value;
-                        },
-                      );
-                    },
+                  Items(
+                    image: AppImage.Attendance,
+                    title: AppLocalizations.of(context)!.attendance_report,
+                    routeName: AppRoutes.AttReport.name,
                   ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  AppLocalizations.of(context)!.quick_actions,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 20),
-                ),
-              ),
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Items(
-                        image: AppImage.qrLight,
-                        title:AppLocalizations.of(context)!.qr,
-                        routeName: AppRoutes.QR.name,
-                      ),
-                      Items(
-                        image: AppImage.Attendance,
-                        title: AppLocalizations.of(context)!.attendance_report,
-                        routeName: AppRoutes.AttReport.name,
-                      ),
-                      Items(
-                        image: AppImage.manualRecording,
-                        title: AppLocalizations.of(context)!.attend,
-                        routeName: AppRoutes.manualAtt.name,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Items(
-                        image: AppImage.complaint,
-                        title: AppLocalizations.of(context)!.submit_complaint,
-                        routeName: AppRoutes.complaint.name,
-                      ),
-                      Items(
-                        image: AppImage.CarLight,
-                        title: AppLocalizations.of(context)!.vehicle_registration,
-                        routeName: AppRoutes.vehicleReport.name,
-                      ),
-                      Items(
-                        image: AppImage.stutusLight,
-                        title: AppLocalizations.of(context)!.site_status,
-                        routeName: AppRoutes.status.name,
-                      ),
-                    ],
+                  Items(
+                    image: AppImage.complaint,
+                    title: AppLocalizations.of(context)!.submit_complaint,
+                    routeName: AppRoutes.complaint.name,
                   ),
                 ],
               ),

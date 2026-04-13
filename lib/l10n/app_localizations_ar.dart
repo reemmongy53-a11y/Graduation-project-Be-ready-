@@ -9,7 +9,7 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get get_started => 'ابدأ الآن';
+  String get get_started => 'كن مستعدآ';
 
   @override
   String get create_account => 'أنشئ حسابًا أو سجّل دخولك لاستكشاف تطبيقنا';
@@ -407,6 +407,87 @@ class AppLocalizationsAr extends AppLocalizations {
   String get entry => 'دخول';
   @override
   String get exit => 'خروج';
+  @override
+  String get parking => 'جراج';
+  @override
+  String get no_data => 'لا يوجد تقارير باركينج';
+  @override
+  String get report => 'تقرير';
+  @override
+  String get complaint => 'شكوى';
+  @override
+  String get home => 'المنزل';
+
+  @override
+  String get control  => 'نظام التحكم';
+  @override
+  String get monthly  => 'نظرة عامة شهرية';
+  @override
+  String get check_in  => 'دخول ';
+  @override
+  String get check_out  => ' خروج';
+  @override
+  String get total  => ' مجموع';
+  @override
+  String get week  => ' اسبوع';
+  @override
+  String get month  => ' شهر';
+  @override
+  String get total_day  => ' مجموع الايام';
+  @override
+  String get no_attendance_details  => '  لقد بدأ الشهر للتو. ستظهر بيانات الحضور مع مرور الأيام.';
+  @override
+  String get no_report  => ' لا يوجد تقرير حتى الآن';
+  @override
+  String get jan  => ' يناير';
+  @override
+  String get feb  => ' فبراير';
+  @override
+  String get mar  => ' مارس';
+  @override
+  String get apr  => ' أبريل';
+  @override
+  String get may  => ' مايو';
+  @override
+  String get jun  => ' يونيو';
+  @override
+  String get jul  => ' يوليو';
+  @override
+  String get aug  => ' أغسطس';
+  @override
+  String get sep  => ' سبتمبر';
+  @override
+  String get oct  => ' أكتوبر';
+  @override
+  String get nov  => ' نوفمبر';
+  @override
+  String get dec  => ' ديسمبر';
+  @override
+  String get day_mon => 'الإثنين';
+
+  @override
+  String get day_tue => 'الثلاثاء';
+
+  @override
+  String get day_wed => 'الأربعاء';
+
+  @override
+  String get day_thu => 'الخميس';
+
+  @override
+  String get day_fri => 'الجمعة';
+
+  @override
+  String get day_sat => 'السبت';
+
+  @override
+  String get day_sun => 'الأحد';
+  @override
+  String get  employee_number=> 'رقم الموظف';
+  @override
+  String get edit => 'تعديل البيانات';
+
+
 
 
 

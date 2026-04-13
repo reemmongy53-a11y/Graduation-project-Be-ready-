@@ -8,6 +8,7 @@ class AttendanceLoadingState extends AttendanceState {}
 class AttendanceSuccessState extends AttendanceState {
   final AttendanceModel model;
   AttendanceSuccessState({required this.model});
+
 }
 
 class AttendanceErrorState extends AttendanceState {

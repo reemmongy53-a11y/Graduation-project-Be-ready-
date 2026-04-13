@@ -1,82 +1,99 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:new_project/Ui/statusService/gateService/device_service.dart';
+import 'device_state.dart';
+import 'dart:async';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:new_project/Ui/statusService/gateService/device_service.dart';
 import 'device_state.dart';
 
 class DeviceCubit extends Cubit<DeviceState> {
   final DeviceService _deviceService;
-  Timer? _pollingTimer;
+  Timer? _gatePollingTimer;
+  Timer? _cameraPollingTimer;
+
+  // ✅ بنحفظ القيمة الجديدة عشان نبعتها مع DeviceCommandDone
+  bool _pendingGateValue = false;
+  bool _pendingCameraValue = false;
 
   DeviceCubit(this._deviceService) : super(DeviceInitial());
 
-
-  Future<void> sendCommand(String command) async {
-    emit(DeviceLoading());
+  Future<void> sendCommand(String command, {required bool newValue}) async {
+    _pendingGateValue = newValue; // ✅
+    emit(DeviceGateLoading());
     try {
       final sentCommand = await _deviceService.sendCommand(command);
-      emit(DeviceCommandSent(sentCommand));
-      _startPolling(isCamera: false);
+      emit(DeviceGateCommandSent(sentCommand));
+      _startGatePolling();
     } catch (e) {
-      emit(DeviceError(e.toString(), type: 'statusService'));
+      emit(DeviceError(e.toString(), type: 'gate'));
     }
   }
 
-
-
-  Future<void> sendCameraCommand(String command) async {
-    emit(DeviceLoading());
+  Future<void> sendCameraCommand(String command, {required bool newValue}) async {
+    _pendingCameraValue = newValue; // ✅
+    emit(DeviceCameraLoading());
     try {
-      final sentCommand = await _deviceService.sendCameraCommand(command);
-      emit(DeviceCommandSent(sentCommand));
-      _startPolling(isCamera: true);
+      final sentCommand = await _deviceService.sendCommand(command); // ✅ نفس الدالة
+      emit(DeviceCameraCommandSent(sentCommand));
+      _startCameraPolling();
     } catch (e) {
       emit(DeviceError(e.toString(), type: 'camera'));
     }
   }
 
-  void _startPolling({required bool isCamera}) {
-    _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(
+  void _startGatePolling() {
+    _gatePollingTimer?.cancel();
+    _gatePollingTimer = Timer.periodic(
       const Duration(seconds: 2),
-          (_) => isCamera ? _checkCameraCommandStatus() : _checkCommandStatus(),
+          (_) => _checkGateStatus(),
     );
   }
 
-  Future<void> _checkCommandStatus() async {
+  void _startCameraPolling() {
+    _cameraPollingTimer?.cancel();
+    _cameraPollingTimer = Timer.periodic(
+      const Duration(seconds: 2),
+          (_) => _checkCameraStatus(),
+    );
+  }
+
+  Future<void> _checkGateStatus() async {
     try {
-      final isDone = await _deviceService.isCommandDone();
+      final isDone = await _deviceService.isCommandDone(); // ✅ نفس الدالة
       if (isDone) {
-        _pollingTimer?.cancel();
-        emit(DeviceCommandDone(type: 'statusService'));
+        _gatePollingTimer?.cancel();
+        emit(DeviceCommandDone(type: 'gate', isOn: _pendingGateValue)); // ✅
       }
     } catch (e) {
-      _pollingTimer?.cancel();
-      emit(DeviceError(e.toString(), type: 'statusService'));
+      _gatePollingTimer?.cancel();
+      emit(DeviceError(e.toString(), type: 'gate'));
     }
   }
 
-  Future<void> _checkCameraCommandStatus() async {
+  Future<void> _checkCameraStatus() async {
     try {
-      final isDone = await _deviceService.isCameraCommandDone();
+      final isDone = await _deviceService.isCommandDone(); // ✅ نفس الدالة
       if (isDone) {
-        _pollingTimer?.cancel();
-        emit(DeviceCommandDone(type: 'camera'));
+        _cameraPollingTimer?.cancel();
+        emit(DeviceCommandDone(type: 'camera', isOn: _pendingCameraValue)); // ✅
       }
     } catch (e) {
-      _pollingTimer?.cancel();
+      _cameraPollingTimer?.cancel();
       emit(DeviceError(e.toString(), type: 'camera'));
     }
   }
 
   void reset() {
-    _pollingTimer?.cancel();
+    _gatePollingTimer?.cancel();
+    _cameraPollingTimer?.cancel();
     emit(DeviceInitial());
   }
 
   @override
   Future<void> close() {
-    _pollingTimer?.cancel();
+    _gatePollingTimer?.cancel();
+    _cameraPollingTimer?.cancel();
     return super.close();
   }
 }
