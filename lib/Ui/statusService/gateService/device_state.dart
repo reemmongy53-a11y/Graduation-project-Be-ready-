@@ -26,7 +26,7 @@ class DeviceCameraCommandSent extends DeviceState {
 
 class DeviceCommandDone extends DeviceState {
   final String type;
-  final bool isOn; // ✅ ضيفنا الحقل ده
+  final bool isOn;
   const DeviceCommandDone({required this.type, required this.isOn});
   @override
   List<Object?> get props => [type, isOn];

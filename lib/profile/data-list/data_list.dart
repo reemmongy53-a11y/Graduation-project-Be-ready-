@@ -11,35 +11,17 @@ import 'package:new_project/providers/languageProvider.dart';
 import 'package:new_project/routes.dart';
 import 'package:provider/provider.dart';
 
-
 enum Themes { light, dark }
 
-class DataList extends StatefulWidget {
+class DataList extends StatelessWidget {
   const DataList({super.key});
-
-  @override
-  State<DataList> createState() => _DataListState();
-}
-
-class _DataListState extends State<DataList> {
-  Themes selectedTheme = Themes.light;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<ThemeProvider>(context, listen: false);
-      setState(() {
-        selectedTheme = provider.isDarkMode ? Themes.dark : Themes.light;
-      });
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context);
     final languageProvider = Provider.of<LanguageProvider>(context);
     final dark = provider.isDarkMode;
+    final selectedTheme = provider.isDarkMode ? Themes.dark : Themes.light;
 
     return BlocProvider(
       create: (_) => getIt<LogoutCubit>(),
@@ -48,7 +30,8 @@ class _DataListState extends State<DataList> {
           return BlocListener<LogoutCubit, LogoutState>(
             listener: (context, state) {
               if (state is LogoutSuccess) {
-                Navigator.pushReplacementNamed(context, AppRoutes.authScreen.name);
+                Navigator.pushReplacementNamed(
+                    context, AppRoutes.authScreen.name);
               }
             },
             child: Column(
@@ -86,12 +69,18 @@ class _DataListState extends State<DataList> {
                 _ListItem(
                   icon: Icons.person_outline,
                   title: AppLocalizations.of(context)!.my_profile,
-                  trailing: IconButton(
-                    onPressed: () => Navigator.pushNamed(context, AppRoutes.profile.name),
-                    icon: Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: dark ? AppColor.softGray : AppColor.gray,
+                  // ✅ trailing بعرض ثابت
+                  trailing: SizedBox(
+                    width: 32,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () =>
+                          Navigator.pushNamed(context, AppRoutes.profile.name),
+                      icon: Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: dark ? AppColor.softGray : AppColor.gray,
+                      ),
                     ),
                   ),
                 ),
@@ -106,7 +95,6 @@ class _DataListState extends State<DataList> {
                       items: Themes.values,
                       onChanged: (item) {
                         if (item == null) return;
-                        setState(() => selectedTheme = item);
                         provider.changeTheme(
                           item == Themes.light ? ThemeMode.light : ThemeMode.dark,
                         );
@@ -131,8 +119,12 @@ class _DataListState extends State<DataList> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _NotificationButton(label: AppLocalizations.of(context)!.allow, isSelected: true),
-                        _NotificationButton(label: AppLocalizations.of(context)!.mute, isSelected: false),
+                        _NotificationButton(
+                            label: AppLocalizations.of(context)!.allow,
+                            isSelected: true),
+                        _NotificationButton(
+                            label: AppLocalizations.of(context)!.mute,
+                            isSelected: false),
                       ],
                     ),
                   ],
@@ -149,7 +141,7 @@ class _DataListState extends State<DataList> {
                   icon: Icons.logout,
                   title: AppLocalizations.of(context)!.logout,
                   color: AppColor.red,
-                  trailing: const SizedBox(),
+                  trailing: const SizedBox(width: 32), // ✅ نفس العرض
                   onTap: () => context.read<LogoutCubit>().logout(),
                 ),
               ],
@@ -254,10 +246,14 @@ class _ExpandableItemState extends State<_ExpandableItem> {
                     ),
                   ],
                 ),
-                Icon(
-                  isExpanded ? Icons.close : Icons.arrow_forward_ios,
-                  size: 16,
-                  color: dark ? AppColor.softGray : AppColor.gray,
+                // ✅ نفس العرض الثابت
+                SizedBox(
+                  width: 32,
+                  child: Icon(
+                    isExpanded ? Icons.close : Icons.arrow_forward_ios,
+                    size: 16,
+                    color: dark ? AppColor.softGray : AppColor.gray,
+                  ),
                 ),
               ],
             ),
@@ -285,7 +281,7 @@ class _ExpandableItemState extends State<_ExpandableItem> {
   }
 }
 
-class _DropdownRow<T> extends StatefulWidget {
+class _DropdownRow<T> extends StatelessWidget {
   final String label;
   final T value;
   final List<T> items;
@@ -299,27 +295,6 @@ class _DropdownRow<T> extends StatefulWidget {
   });
 
   @override
-  State<_DropdownRow<T>> createState() => _DropdownRowState<T>();
-}
-
-class _DropdownRowState<T> extends State<_DropdownRow<T>> {
-  late T selected;
-
-  @override
-  void initState() {
-    super.initState();
-    selected = widget.value;
-  }
-
-  @override
-  void didUpdateWidget(covariant _DropdownRow<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value) {
-      setState(() => selected = widget.value);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final dark = Provider.of<ThemeProvider>(context).isDarkMode;
 
@@ -327,13 +302,13 @@ class _DropdownRowState<T> extends State<_DropdownRow<T>> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          widget.label,
+          label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: dark ? AppColor.white : AppColor.black,
           ),
         ),
         DropdownButton<T>(
-          value: selected,
+          value: value,
           underline: const SizedBox(),
           dropdownColor: dark ? AppColor.navy : AppColor.primary,
           icon: Icon(
@@ -344,16 +319,13 @@ class _DropdownRowState<T> extends State<_DropdownRow<T>> {
             color: dark ? AppColor.white : AppColor.black,
             fontSize: 14,
           ),
-          items: widget.items.map((item) {
+          items: items.map((item) {
             return DropdownMenuItem(
               value: item,
               child: Text(item.toString().split('.').last),
             );
           }).toList(),
-          onChanged: (val) {
-            setState(() => selected = val!);
-            widget.onChanged(val);
-          },
+          onChanged: onChanged,
         ),
       ],
     );
@@ -384,7 +356,6 @@ class _NotificationButtonState extends State<_NotificationButton> {
 
   @override
   Widget build(BuildContext context) {
-
     final dark = Provider.of<ThemeProvider>(context).isDarkMode;
 
     return GestureDetector(

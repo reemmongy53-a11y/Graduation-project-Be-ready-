@@ -22,22 +22,22 @@ class AuthRepositoryImp implements AuthRepository {
           )
           .then((value) => value);
    return Right(result.toEntity());
-    }
-on DioException
-    catch (e) {
-  print('=== DioError ===');
-  print('Status: ${e.response?.statusCode}');
-  print('Data: ${e.response?.data}');
-  print('Message: ${e.message}');
-      return Left(ServerFailure(message: e.response?.data["message"]));
-    }
-    catch (e) {
-      print('=== General Error ===');
-      print('Error: $e');
-      return Left(ServerFailure(message:"Error Happened"));
-    }
+    }on DioException catch (e) {
+      print('=== DioError ===');
+      print('Status: ${e.response?.statusCode}');
+      print('Data: ${e.response?.data}');
+      print('Message: ${e.message}');
 
+      // ← الحل هنا
+      String errorMessage;
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        errorMessage = 'تعذر الاتصال بالسيرفر، تحقق من الإنترنت';
+      } else {
+        errorMessage = e.response?.data?["message"] ?? 'حدث خطأ';
+      }
 
-  }
-
+      return Left(ServerFailure(message: errorMessage));
+    }}
 }

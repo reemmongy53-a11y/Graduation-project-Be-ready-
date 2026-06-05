@@ -793,6 +793,11 @@ String get no_data;
   String get day_sun;
   String get employee_number;
   String get edit;
+  String get device;
+  String get camera_control;
+  String get please_enter_data;
+  String get succsesful;
+  String get login_subtitle;
 
 
 

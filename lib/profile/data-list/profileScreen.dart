@@ -78,11 +78,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
             },
             child: CustomScaffold(
-              icons: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: AppColor.royalBlue,
-              ),
-              onIconPressed: () => Navigator.pop(context),
+              // ← شيلنا icons و onIconPressed
+              // لأن ProfileScreen شاشة في BottomBar مش بتتفتح بـ push
               body: BlocBuilder<ProfileCubit, ProfileState>(
                 builder: (context, state) {
                   if (state is ProfileLoadingState) {
@@ -160,13 +157,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           icon: Icons.person_outline,
                         ),
                         const SizedBox(height: 12),
-                        AppFormField(
-                          hintText: AppLocalizations.of(context)!.email,
-                          controller: emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          icon: Icons.email_outlined,
-                        ),
-                        const SizedBox(height: 12),
+
 
                         if (model != null &&
                             model.plateNumber.isNotEmpty) ...[

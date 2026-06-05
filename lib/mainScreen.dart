@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:new_project/Ui/Security%20screen/security_screen.dart';
 import 'package:new_project/Ui/employee/employeeScreen.dart';
 import 'package:new_project/attendance_report/Att-report_screen.dart';
-import 'package:new_project/Ui/complaint.dart';
+import 'package:new_project/Ui/complaint/complaint.dart';
 import 'package:new_project/data_qr/qr-Screen.dart';
 import 'package:new_project/design/AppColor.dart';
-import 'package:new_project/design/AppImage.dart';
 import 'package:new_project/l10n/app_localizations.dart';
-import 'package:new_project/profile/data-list/data_list.dart';
+import 'package:new_project/profile/data-list/menu_dialog.dart';
 import 'package:new_project/profile/data-list/profileScreen.dart';
 import 'package:new_project/providers/ThemeProvider.dart';
 import 'package:new_project/core/user_session/user_session.dart';
@@ -29,9 +28,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-
     _isSecurity = UserSession.role == 'security';
-
     if (_isSecurity) {
       _screens = [
         const ProfileScreen(),
@@ -49,34 +46,14 @@ class _MainScreenState extends State<MainScreen> {
         const Complaint(),
       ];
     }
-
     _homeIndex = 2;
     _currentIndex = _homeIndex;
-  }
-
-  void _showMenu(BuildContext context, bool dark) {
-    showMenu(
-      color: dark ? AppColor.darkBackground : AppColor.white,
-      context: context,
-      position: const RelativeRect.fromLTRB(1000, 80, 0, 0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      items: [
-        PopupMenuItem(
-          enabled: false,
-          child: SizedBox(width: 250, child: DataList()),
-        ),
-      ],
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final dark = Provider.of<ThemeProvider>(context).isDarkMode;
     final loc = AppLocalizations.of(context)!;
-
-    final bool showMenuIcon = !_isSecurity && _currentIndex == _homeIndex;
 
     final items = [
       BottomNavigationBarItem(
@@ -107,14 +84,13 @@ class _MainScreenState extends State<MainScreen> {
     ];
 
     return PopScope(
-      canPop: false,
+      canPop: _currentIndex == _homeIndex,
       onPopInvokedWithResult: (didPop, result) {
-        if (_currentIndex != _homeIndex) {
+        if (!didPop && _currentIndex != _homeIndex) {
           setState(() => _currentIndex = _homeIndex);
         }
       },
       child: Scaffold(
-
         body: IndexedStack(
           index: _currentIndex,
           children: _screens,

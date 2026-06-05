@@ -169,7 +169,12 @@
   "day_sat": "Sat",
   "day_sun": "Sun",
   "employee_number": "Employee Number",
-  "edit": "Edit Data"
+  "edit": "Edit Data",
+  "device": "Device",
+  "camera_control": "Camera Control",
+  "please_enter_data":"Please fill in all fields",
+  "succsesful": "Complaint submitted successfully",
+  "login_subtitle": "Enter your credentials provided by your administrator"
 
 
 
