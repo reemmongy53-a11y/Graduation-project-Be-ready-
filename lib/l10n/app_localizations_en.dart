@@ -478,6 +478,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get  employee_number=> 'Employee Number';
   @override
   String get edit => 'Edit Data';
+  @override
+  String get device => 'Device';
+  @override
+  String get camera_control => 'Camera Control';
+  @override
+  String get please_enter_data => 'Please fill in all fields';
+
+  @override
+  String get succsesful => 'Complaint submitted successfully';
+  @override
+  String get login_subtitle => 'Enter your credentials to login to our app';
+
 
 
 

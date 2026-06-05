@@ -5,7 +5,7 @@ import 'package:new_project/Ui/statusService/gateService/Status.dart';
 import 'package:new_project/Ui/auth_Screen/AuthScreen.dart';
 import 'package:new_project/Ui/auth_Screen/LogIn%20Screen/LoginForm.dart';
 import 'package:new_project/Ui/auth_Screen/RegisterScreen/SignupForm.dart';
-import 'package:new_project/Ui/complaint.dart';
+import 'package:new_project/Ui/complaint/complaint.dart';
 import 'package:new_project/Ui/employee/employeeScreen.dart';
 import 'package:new_project/data_qr/qr-Screen.dart';
 import 'package:new_project/forgetPassword/chackEmail.dart';

@@ -16,7 +16,7 @@ class VerifyOtpCubit extends Cubit<VerifyOtpState> {
     emit(VerifyOtpLoading());
     try {
       final response = await _dio.post(
-        AppConst.verifyOtpEndPoint, // ✅ من AppConst مش hardcoded
+        AppConst.verifyOtpEndPoint,
         data: {'email': email, 'otp': otp},
       );
       emit(VerifyOtpSuccess(token: response.data['token'] ?? ''));
@@ -29,7 +29,6 @@ class VerifyOtpCubit extends Cubit<VerifyOtpState> {
     }
   }
 
-  // ✅ Resend OTP
   Future<void> resendOtp({required String email}) async {
     emit(VerifyOtpLoading());
     try {
@@ -37,7 +36,7 @@ class VerifyOtpCubit extends Cubit<VerifyOtpState> {
         AppConst.forgotPasswordEndPoint,
         data: {'email': email},
       );
-      emit(VerifyOtpInitial());
+      emit(VerifyOtpResendSuccess()); // ✅ بدل VerifyOtpInitial
     } on DioException catch (e) {
       emit(VerifyOtpError(
         message: e.response?.data['message'] ?? 'Failed to resend OTP',

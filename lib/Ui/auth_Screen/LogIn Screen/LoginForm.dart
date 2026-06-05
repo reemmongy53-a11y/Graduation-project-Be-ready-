@@ -80,21 +80,27 @@ class _LoginFormState extends State<LoginForm> {
                       AppFormField(
                         controller: emailController,
                         label: AppLocalizations.of(context)!.email,
+                        hintText: 'your@email.com', // ✅ مضاف
                         icon: Icons.email,
                         keyboardType: TextInputType.emailAddress,
                         validator: (text) {
                           if (text?.trim().isEmpty == true)
                             return AppLocalizations.of(context)!.email_required;
-                          if (!isValidEmail(text ?? '')) return AppLocalizations.of(context)!.invalid_email;
+                          if (!isValidEmail(text ?? ''))
+                            return AppLocalizations.of(context)!.invalid_email;
                           return null;
                         },
                       ),
 
                       const SizedBox(height: 12),
 
+
+
+
                       AppFormField(
                         controller: passwordController,
                         label: AppLocalizations.of(context)!.password,
+                        hintText: '••••••••', // ✅ مضاف
                         icon: Icons.lock,
                         suffixIcon: Icons.visibility,
                         isPassword: true,

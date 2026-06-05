@@ -7,7 +7,9 @@ import 'package:new_project/design/AppColor.dart';
 import 'package:new_project/forgetPassword/forgot_password_cubit.dart';
 import 'package:new_project/forgetPassword/forgot_password_state.dart';
 import 'package:new_project/l10n/app_localizations.dart';
+import 'package:new_project/providers/ThemeProvider.dart';
 import 'package:new_project/routes.dart';
+import 'package:provider/provider.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -29,6 +31,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Provider.of<ThemeProvider>(context).isDarkMode;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return BlocProvider(
       create: (_) => getIt<ForgotPasswordCubit>(),
       child: Builder(
@@ -47,7 +52,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   _isDialogShowing = false;
                   Navigator.pop(context);
                 }
-
                 Navigator.pushNamed(
                   context,
                   AppRoutes.checkEmail.name,
@@ -67,67 +71,129 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               }
             },
             child: Scaffold(
-              backgroundColor: AppColor.primary,
-              body: SingleChildScrollView(
+              backgroundColor: dark ? AppColor.darkBackground : AppColor.primary,
+              body: SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Form(
                     key: formKey,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        const SizedBox(height: 16),
+
+                        // ✅ زر الرجوع
                         Align(
                           alignment: Alignment.centerLeft,
                           child: CircleAvatar(
                             radius: 25,
-                            backgroundColor: AppColor.softGray,
+                            backgroundColor: dark
+                                ? AppColor.softGray.withValues(alpha: 0.2)
+                                : AppColor.softGray,
                             child: IconButton(
                               onPressed: () => Navigator.pop(context),
-                              icon: Icon(Icons.arrow_back_ios, color: AppColor.black, size: 20),
+                              icon: Icon(
+                                Icons.arrow_back_ios,
+                                color: dark ? AppColor.white : AppColor.black,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ),
-                        SizedBox(height: 20),
-                        Text(
-                         AppLocalizations.of(context)!.forgot_password,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColor.black),
+
+                        // ✅ مساحة ديناميكية قبل المحتوى عشان يتوسط
+                        SizedBox(height: screenHeight * 0.08),
+
+                        // ✅ أيقونة كبيرة فوق
+                        Center(
+                          child: Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: AppColor.royalBlue.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.lock_reset_outlined,
+                              color: AppColor.royalBlue,
+                              size: 40,
+                            ),
+                          ),
                         ),
-                        SizedBox(height: 20),
+
+                        const SizedBox(height: 32),
+
+                        // ✅ العنوان
                         Text(
-                         AppLocalizations.of(context)!.please_enter_email,
-                          style: Theme.of(context).textTheme.titleSmall,
+                          AppLocalizations.of(context)!.forgot_password,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: dark ? AppColor.white : AppColor.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 26,
+                          ),
                         ),
-                        SizedBox(height: 20),
+
+                        const SizedBox(height: 12),
+
+                        // ✅ الوصف
+                        Text(
+                          AppLocalizations.of(context)!.please_enter_email,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: dark ? AppColor.softGray : AppColor.gray,
+                            height: 1.5,
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // ✅ حقل الإيميل
                         AppFormField(
                           label: AppLocalizations.of(context)!.email,
                           controller: emailController,
                           icon: Icons.email,
                           keyboardType: TextInputType.emailAddress,
                           validator: (text) {
-                            if (text?.trim().isEmpty == true) return AppLocalizations.of(context)!.email_required;
-                            if (!isValidEmail(text ?? '')) return AppLocalizations.of(context)!.invalid_email;
+                            if (text?.trim().isEmpty == true)
+                              return AppLocalizations.of(context)!.email_required;
+                            if (!isValidEmail(text ?? ''))
+                              return AppLocalizations.of(context)!.invalid_email;
                             return null;
                           },
                         ),
-                        SizedBox(height: 20),
+
+                        const SizedBox(height: 24),
+
+                        // ✅ زر Reset
                         BlocBuilder<ForgotPasswordCubit, ForgotPasswordState>(
                           builder: (context, state) {
-                            return ElevatedButton(
-                              onPressed: state is ForgotPasswordLoadingState
-                                  ? null
-                                  : () {
-                                if (formKey.currentState?.validate() == true) {
-                                  context.read<ForgotPasswordCubit>().forgotPassword(
-                                    email: emailController.text.trim(),
-                                  );
-                                }
-                              },
-                              child: state is ForgotPasswordLoadingState
-                                  ? const CircularProgressIndicator(color: Colors.white)
-                                  : Text(
-                                AppLocalizations.of(context)!.reset_password,
-                                style: Theme.of(context).textTheme.bodySmall,
+                            return SizedBox(
+                              height: 60,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColor.royalBlue,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                onPressed: state is ForgotPasswordLoadingState
+                                    ? null
+                                    : () {
+                                  if (formKey.currentState?.validate() == true) {
+                                    context.read<ForgotPasswordCubit>().forgotPassword(
+                                      email: emailController.text.trim(),
+                                    );
+                                  }
+                                },
+                                child: state is ForgotPasswordLoadingState
+                                    ? const CircularProgressIndicator(color: Colors.white)
+                                    : Text(
+                                  AppLocalizations.of(context)!.reset_password,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColor.white,
+                                  ),
+                                ),
                               ),
                             );
                           },

@@ -486,6 +486,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get  employee_number=> 'رقم الموظف';
   @override
   String get edit => 'تعديل البيانات';
+  @override
+  String get device => 'جهاز ';
+  @override
+  String get camera_control => ' التحكم في الكاميرا';
+  @override
+  String get please_enter_data => ' التحكم في الكاميرا';
+  @override
+  String get succsesful => ' التحكم في الكاميرا';
+  @override
+  String get login_subtitle => '  أدخل بياناتك التي أرسلها لك المسؤول ';
+
 
 
 

@@ -7,7 +7,7 @@ import 'package:new_project/attendance_report/attendance_state.dart';
 import 'package:new_project/core/di/di.dart';
 import 'package:new_project/core/user_session/user_session.dart';
 import 'package:new_project/l10n/app_localizations.dart';
-import 'package:new_project/profile/data-list/data_list.dart';
+import 'package:new_project/profile/data-list/menu_dialog.dart';
 import 'package:new_project/providers/ThemeProvider.dart';
 import 'package:new_project/routes.dart';
 import 'package:new_project/custom/News%20summary/newsSummary.dart';
@@ -49,43 +49,23 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   Widget build(BuildContext context) {
     final dark = Provider.of<ThemeProvider>(context).isDarkMode;
     final name = UserSession.name.isNotEmpty ? UserSession.name : "User";
-    final email = UserSession.email.isNotEmpty
-        ? UserSession.email
-        : "name@gmail.com";
+    final email = UserSession.email.isNotEmpty ? UserSession.email : "name@gmail.com";
 
     return BlocProvider(
       create: (_) => getIt<AttendanceCubit>()..getReport(),
       child: CustomScaffold(
         image: AppImage.Logo,
         icons: Icon(Icons.menu, color: AppColor.royalBlue, size: 30),
-        onIconPressed: () {
-          showMenu(
-            color: dark ? AppColor.darkBackground : AppColor.white,
-            context: context,
-            position: const RelativeRect.fromLTRB(1000, 80, 0, 0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            items: [
-              PopupMenuItem(
-                enabled: false,
-                child: SizedBox(width: 250, child: DataList()),
-              ),
-            ],
-          );
-        },
+        onIconPressed: () => showMenuDialog(context), // ✅ استخدام الدالة المشتركة
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
               DataFile(name: name, email: email),
               const SizedBox(height: 20),
-
               BlocBuilder<AttendanceCubit, AttendanceState>(
                 builder: (context, state) {
-                  final summary = state is AttendanceSuccessState
-                      ? state.model.summary
-                      : null;
+                  final summary = state is AttendanceSuccessState ? state.model.summary : null;
                   return Center(
                     child: NewsSummary(
                       image: AppImage.Att,
@@ -99,7 +79,6 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                 },
               ),
               const SizedBox(height: 20),
-
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -124,9 +103,7 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                       children: [
                         Item(
                           image: AppImage.Attendance,
-                          title: AppLocalizations.of(
-                            context,
-                          )!.attendance_report,
+                          title: AppLocalizations.of(context)!.attendance_report,
                           routeName: AppRoutes.AttReport.name,
                         ),
                         Item(
@@ -146,9 +123,7 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                   color: dark ? AppColor.darkBackground : AppColor.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: dark
-                        ? AppColor.movBlue.withValues(alpha: 0.4)
-                        : AppColor.softBlue,
+                    color: dark ? AppColor.movBlue.withValues(alpha: 0.4) : AppColor.softBlue,
                     width: 1,
                   ),
                 ),
@@ -162,46 +137,35 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                         children: [
                           Text(
                             AppLocalizations.of(context)!.activity,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: dark ? AppColor.white : AppColor.black,
-                                ),
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: dark ? AppColor.white : AppColor.black,
+                            ),
                           ),
                           GestureDetector(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.AttReport.name,
-                            ),
+                            onTap: () => Navigator.pushNamed(context, AppRoutes.AttReport.name),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 5,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                               decoration: BoxDecoration(
                                 color: AppColor.blue.withValues(alpha: 0.10),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
                                 AppLocalizations.of(context)!.view_all,
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColor.blue,
-                                    ),
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColor.blue,
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 8),
                       Divider(
-                        color: dark
-                            ? AppColor.movBlue.withValues(alpha: 0.2)
-                            : AppColor.softBlue,
+                        color: dark ? AppColor.movBlue.withValues(alpha: 0.2) : AppColor.softBlue,
                         thickness: 0.8,
                         height: 1,
                       ),
@@ -211,84 +175,54 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                           if (state is AttendanceLoadingState) {
                             return const Padding(
                               padding: EdgeInsets.symmetric(vertical: 24),
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
+                              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
                             );
                           }
-
                           if (state is AttendanceErrorState) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Center(
                                 child: Text(
                                   state.message,
-                                  style: const TextStyle(
-                                    color: AppColor.red,
-                                    fontSize: 12,
-                                  ),
+                                  style: const TextStyle(color: AppColor.red, fontSize: 12),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                             );
                           }
-
                           if (state is AttendanceSuccessState) {
                             final details = state.model.details;
-
                             if (details.isEmpty) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 24,
-                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 24),
                                 child: Center(
                                   child: Text(
                                     AppLocalizations.of(context)!.no_activity,
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: dark
-                                          ? AppColor.softGray
-                                          : AppColor.gray,
+                                      color: dark ? AppColor.softGray : AppColor.gray,
                                     ),
                                   ),
                                 ),
                               );
                             }
-
-                            final recentEntries = details.entries
-                                .take(3)
-                                .toList();
-
+                            final recentEntries = details.entries.take(3).toList();
                             return Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: List.generate(recentEntries.length, (
-                                i,
-                              ) {
+                              children: List.generate(recentEntries.length, (i) {
                                 final entry = recentEntries[i];
                                 final date = _formatDate(entry.key);
-                                final value =
-                                    entry.value as Map<String, dynamic>;
+                                final value = entry.value as Map<String, dynamic>;
                                 final status = value['status'] ?? '--';
-                                final timeIn = _formatTime(
-                                  value['checkIn'] ?? '--',
-                                );
-                                final timeOut = _formatTime(
-                                  value['checkOut'] ?? '--',
-                                );
-                                final isAbsent =
-                                    status ==
-                                    AppLocalizations.of(context)!.absence;
+                                final timeIn = _formatTime(value['checkIn'] ?? '--');
+                                final timeOut = _formatTime(value['checkOut'] ?? '--');
+                                final isAbsent = status == AppLocalizations.of(context)!.absence;
                                 final isLast = i == recentEntries.length - 1;
-
                                 return Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 10,
-                                      ),
+                                      padding: const EdgeInsets.symmetric(vertical: 10),
                                       child: Row(
                                         children: [
                                           Container(
@@ -296,44 +230,29 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                             height: 10,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
-                                              color: isAbsent
-                                                  ? AppColor.red
-                                                  : Colors.green,
+                                              color: isAbsent ? AppColor.red : Colors.green,
                                             ),
                                           ),
                                           const SizedBox(width: 10),
-
                                           Expanded(
                                             child: Text(
                                               date,
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w500,
-                                                color: dark
-                                                    ? AppColor.white
-                                                    : AppColor.black,
+                                                color: dark ? AppColor.white : AppColor.black,
                                               ),
                                             ),
                                           ),
-
                                           if (isAbsent)
                                             Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 3,
-                                                  ),
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                               decoration: BoxDecoration(
-                                                color: AppColor.red.withValues(
-                                                  alpha: 0.10,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
+                                                color: AppColor.red.withValues(alpha: 0.10),
+                                                borderRadius: BorderRadius.circular(8),
                                               ),
                                               child: Text(
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.absence,
+                                                AppLocalizations.of(context)!.absence,
                                                 style: const TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w500,
@@ -344,27 +263,18 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                           else
                                             Row(
                                               children: [
-                                                _TimeBadge(
-                                                  time: timeIn,
-                                                  isIn: true,
-                                                ),
+                                                _TimeBadge(time: timeIn, isIn: true),
                                                 const SizedBox(width: 6),
-                                                _TimeBadge(
-                                                  time: timeOut,
-                                                  isIn: false,
-                                                ),
+                                                _TimeBadge(time: timeOut, isIn: false),
                                               ],
                                             ),
                                         ],
                                       ),
                                     ),
-
                                     if (!isLast)
                                       Divider(
                                         color: dark
-                                            ? AppColor.movBlue.withValues(
-                                                alpha: 0.15,
-                                              )
+                                            ? AppColor.movBlue.withValues(alpha: 0.15)
                                             : AppColor.softBlue,
                                         thickness: 0.6,
                                         height: 1,
@@ -374,7 +284,6 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                               }),
                             );
                           }
-
                           return const SizedBox.shrink();
                         },
                       ),
@@ -383,19 +292,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                 ),
               ),
               const SizedBox(height: 50),
-
               InkWell(
-                onTap: () =>
-                    Navigator.pushNamed(context, AppRoutes.complaint.name),
+                onTap: () => Navigator.pushNamed(context, AppRoutes.complaint.name),
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: dark ? AppColor.darkBackground : AppColor.softBlue,
                     borderRadius: BorderRadius.circular(15),
                     border: Border.all(
-                      color: dark
-                          ? AppColor.movBlue.withValues(alpha: 0.8)
-                          : Colors.transparent,
+                      color: dark ? AppColor.movBlue.withValues(alpha: 0.8) : Colors.transparent,
                       width: 1.5,
                     ),
                   ),
@@ -411,18 +316,16 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                             Text(
                               AppLocalizations.of(context)!.submit_complaint,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: dark ? AppColor.white : null,
-                                  ),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: dark ? AppColor.white : null,
+                              ),
                             ),
                             Text(
                               AppLocalizations.of(context)!.report_incident,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: dark ? AppColor.softGray : null,
-                                  ),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: dark ? AppColor.softGray : null,
+                              ),
                             ),
                           ],
                         ),
@@ -459,10 +362,7 @@ class _TimeBadge extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(8),
-      ),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
       child: Text(
         time,
         style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: fg),

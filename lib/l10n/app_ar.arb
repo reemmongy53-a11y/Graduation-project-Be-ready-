@@ -171,6 +171,12 @@
   "day_sun": "الأحد",
   "employee_number": "رقم الموظف ",
   "edit": "تعديل البيانات",
-  "new_password ": "كلمه سر جديده"
+  "new_password ": "كلمه سر جديده",
+  "device": "جهاز",
+  "camera_control": "التحكم في الكاميرا",
+  "please_enter_data": "من فضلك املى كل الحقول",
+  "succsesful": "تم تقديم الشكوى بنجاح",
+  "login_subtitle": "أدخل بياناتك التي أرسلها لك المسؤول"
+
 
 }

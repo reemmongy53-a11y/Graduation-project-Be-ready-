@@ -24,13 +24,12 @@ class _StatusState extends State<Status> {
   @override
   void initState() {
     super.initState();
-    // ✅ بنسمع التغييرات بشكل صحيح
     UserSession.gateStatus.addListener(_refresh);
     UserSession.cameraStatus.addListener(_refresh);
   }
 
   void _refresh() {
-    if (mounted) setState(() {}); // ✅ mounted check
+    if (mounted) setState(() {});
   }
 
   @override
@@ -42,12 +41,12 @@ class _StatusState extends State<Status> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ BlocProvider فوق Consumer
+
     return BlocProvider(
       create: (_) => DeviceCubit(
         DeviceService(
           baseUrl: 'https://smart-system-attendance-production-d4bd.up.railway.app',
-          token: UserSession.token ?? '', // ✅ null safety
+          token: UserSession.token ?? '',
         ),
       ),
       child: Consumer<ThemeProvider>(
@@ -57,7 +56,7 @@ class _StatusState extends State<Status> {
           return BlocConsumer<DeviceCubit, DeviceState>(
             listener: (context, state) {
               if (state is DeviceCommandDone) {
-                // ✅ بنقرأ من state.isOn مش من الـ getter
+
                 final msg = state.type == 'gate'
                     ? (state.isOn
                     ? AppLocalizations.of(context)!.gate_open
@@ -73,7 +72,6 @@ class _StatusState extends State<Status> {
                   ),
                 );
               } else if (state is DeviceError) {
-                // ✅ Rollback — _refresh هتعمل setState أوتوماتيك
                 if (state.type == 'gate') {
                   UserSession.gateStatus.value = !gateOn;
                 } else {
@@ -104,18 +102,18 @@ class _StatusState extends State<Status> {
                           child: _DeviceCardCompact(
                             dark: dark,
                             imagePath: AppImage.camiraDark,
-                            title: AppLocalizations.of(context)!.control_of_camera,
-                            deviceLabel: AppLocalizations.of(context)!.camera,
-                            deviceValue: AppLocalizations.of(context)!.face_id,
+                            title: AppLocalizations.of(context)!.camera_control,
+                            deviceLabel: AppLocalizations.of(context)!.device,
+                            deviceValue: AppLocalizations.of(context)!.camera,
                             statusLabel: AppLocalizations.of(context)!.status,
                             statusValue: cameraOn
-                                ? AppLocalizations.of(context)!.open_camera
-                                : AppLocalizations.of(context)!.close_camera,
+                                ? AppLocalizations.of(context)!.open
+                                : AppLocalizations.of(context)!.close,
                             isLoading: isCameraLoading,
                             isOn: cameraOn,
                             onToggle: () {
                               final newVal = !cameraOn;
-                              UserSession.saveCameraStatus(newVal); // ✅ بدل .value = newVal
+                              UserSession.saveCameraStatus(newVal);
                               context.read<DeviceCubit>().sendCameraCommand(
                                 newVal ? 'open_camera' : 'close_camera',
                                 newValue: newVal,
@@ -129,17 +127,17 @@ class _StatusState extends State<Status> {
                             dark: dark,
                             imagePath: AppImage.gateDark,
                             title: AppLocalizations.of(context)!.gate_control,
-                            deviceLabel: AppLocalizations.of(context)!.gate,
-                            deviceValue: AppLocalizations.of(context)!.d1,
+                            deviceLabel: AppLocalizations.of(context)!.device,
+                            deviceValue: AppLocalizations.of(context)!.gate,
                             statusLabel: AppLocalizations.of(context)!.status,
                             statusValue: gateOn
-                                ? AppLocalizations.of(context)!.open_gate
-                                : AppLocalizations.of(context)!.close_gate,
+                                ? AppLocalizations.of(context)!.open
+                                : AppLocalizations.of(context)!.close,
                             isLoading: isGateLoading,
                             isOn: gateOn,
                             onToggle: () {
                               final newVal = !gateOn;
-                              UserSession.saveGateStatus(newVal); // ✅ بدل .value = newVal
+                              UserSession.saveGateStatus(newVal);
                               context.read<DeviceCubit>().sendCommand(
                                 newVal ? 'open_gate' : 'close_gate',
                                 newValue: newVal,

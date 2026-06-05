@@ -16,11 +16,11 @@ class AppFormField extends StatefulWidget {
     this.suffixIcon,
     this.controller,
     this.validator,
-
     this.readOnly = false,
     this.initialValue,
+    this.maxLines = 1,   // ✅ مضاف
+    this.minLines,       // ✅ مضاف
     super.key,
-
   });
 
   final String? label;
@@ -31,9 +31,10 @@ class AppFormField extends StatefulWidget {
   final String? hintText;
   final TextEditingController? controller;
   final validator;
-
   final bool readOnly;
   final String? initialValue;
+  final int? maxLines;   // ✅ مضاف
+  final int? minLines;   // ✅ مضاف
 
   @override
   State<AppFormField> createState() => _AppFormFieldState();
@@ -52,6 +53,10 @@ class _AppFormFieldState extends State<AppFormField> {
           controller: widget.controller,
           keyboardType: widget.keyboardType,
           obscureText: widget.isPassword && !isTextVisible,
+          readOnly: widget.readOnly,
+          initialValue: widget.initialValue,
+          maxLines: widget.isPassword ? 1 : widget.maxLines,  // ✅ مضاف
+          minLines: widget.minLines,                           // ✅ مضاف
           style: TextStyle(
             color: isDark ? AppColor.white : AppColor.black,
           ),
@@ -62,13 +67,13 @@ class _AppFormFieldState extends State<AppFormField> {
               color: isDark
                   ? AppColor.white.withOpacity(0.4)
                   : AppColor.black.withOpacity(0.4),
-              fontSize: 16,
+              fontSize: 14,
             ),
             labelStyle: GoogleFonts.inter(
               color: isDark
                   ? AppColor.white.withOpacity(0.7)
                   : AppColor.black.withOpacity(0.5),
-              fontSize: 16,
+              fontSize: 14,
             ),
             prefixIcon: widget.icon != null
                 ? Icon(
@@ -94,7 +99,7 @@ class _AppFormFieldState extends State<AppFormField> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                  color: isDark ? AppColor.royalBlue : AppColor.softGray,
+                color: isDark ? AppColor.royalBlue : AppColor.softGray,
                 width: 2,
               ),
             ),
